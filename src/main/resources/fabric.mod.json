@@ -1,0 +1,32 @@
+{
+	"schemaVersion": 1,
+	"id": "html-my-screen",
+	"version": "${version}",
+	"name": "HTML My screen",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/html-my-screen/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.edgn.HTMLMyScreen"
+		]
+	},
+	"mixins": [],
+	"depends": {
+		"fabricloader": ">=0.17.2",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

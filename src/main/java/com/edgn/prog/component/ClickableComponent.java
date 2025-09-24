@@ -1,0 +1,6 @@
+package com.edgn.prog.component;
+
+public interface ClickableComponent {
+    boolean handleClick(double mouseX, double mouseY, int button);
+    boolean isPointInBounds(double x, double y);
+}
