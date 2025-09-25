@@ -1,8 +1,11 @@
 package com.edgn.prog.minecraft.screen.screens;
 
+import com.edgn.prog.component.attribute.AttributeProcessor;
+import com.edgn.prog.component.attribute.TagAttribute;
 import com.edgn.prog.component.css.CssRegistry;
 import com.edgn.prog.component.css.CssRule;
 import com.edgn.prog.component.css.EdgnCssRegistry;
+import com.edgn.prog.component.html.AbstractEdgnComponent;
 import com.edgn.prog.component.html.EdgnComponent;
 import com.edgn.prog.exceptions.CssParsingException;
 import com.edgn.prog.exceptions.EdgnParsingException;
@@ -22,7 +25,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public final class PathBasedEdgnScreen extends EdgnScreen {
@@ -59,31 +61,60 @@ public final class PathBasedEdgnScreen extends EdgnScreen {
         MinecraftClient client = MinecraftClient.getInstance();
         var realContext = new WindowSizeContext(client.getWindow().getScaledWidth(), client.getWindow().getScaledHeight());
 
-        for (CssRule rule : cssRules) {
-            List<EdgnComponent> matchingComponents = findMatchingComponents(rule.selector());
+        applyCssToComponentTree(rootComponent, realContext);
+    }
 
-            for (EdgnComponent component : matchingComponents) {
-                for (var declaration : rule.declarations().entrySet()) {
-                    cssRegistry.applyCssRule(component, declaration.getKey(), declaration.getValue(), realContext);
+    private void applyCssToComponentTree(EdgnComponent component, MinecraftRenderContext context) {
+        for (CssRule rule : cssRules) {
+            if (matchesSelector(rule.selector(), component)) {
+                for (var entry : rule.declarations().entrySet()) {
+                    cssRegistry.applyCssRule(component, entry.getKey(), entry.getValue(), context);
                 }
             }
         }
-    }
 
-    private List<EdgnComponent> findMatchingComponents(String selector) {
-        List<EdgnComponent> matches = new ArrayList<>();
-        findComponentsByTag(rootComponent, selector, matches);
-        return matches;
-    }
-
-    private void findComponentsByTag(EdgnComponent component, String tagName, List<EdgnComponent> results) {
-        if (component.getTagName().equals(tagName)) {
-            results.add(component);
+        if (component instanceof AttributeProcessor processor) {
+            processor.processAttributes(cssRules, cssRegistry, context);
         }
 
         for (EdgnComponent child : component.getChildren()) {
-            findComponentsByTag(child, tagName, results);
+            applyCssToComponentTree(child, context);
         }
+    }
+
+    private boolean matchesSelector(String selector, EdgnComponent component) {
+        selector = selector.trim();
+
+        if (selector.matches("^[a-zA-Z][a-zA-Z0-9-]*$")) {
+            return component.getTagName().equals(selector);
+        }
+
+        if (selector.startsWith(".")) {
+            String className = selector.substring(1);
+            return hasClass(component, className);
+        }
+
+        if (selector.startsWith("#")) {
+            String id = selector.substring(1);
+            return hasId(component, id);
+        }
+
+        return false;
+    }
+
+    private boolean hasClass(EdgnComponent component, String className) {
+        if (component instanceof AbstractEdgnComponent abstractComp) {
+            return abstractComp.hasClass(className);
+        }
+        return false;
+    }
+
+    private boolean hasId(EdgnComponent component, String id) {
+        if (component instanceof AbstractEdgnComponent abstractComp) {
+            String componentId = abstractComp.getAttribute(TagAttribute.ID.getProperty(), "");
+            return componentId.equals(id);
+        }
+        return false;
     }
 
     @Override

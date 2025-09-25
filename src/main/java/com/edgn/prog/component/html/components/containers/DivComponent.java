@@ -4,6 +4,7 @@ import com.edgn.prog.component.attribute.TagAttribute;
 import com.edgn.prog.component.html.HtmlTag;
 import com.edgn.prog.component.html.components.CssAwareComponent;
 import com.edgn.prog.minecraft.MinecraftRenderContext;
+import com.edgn.utils.ColorUtils;
 
 import java.util.Set;
 
@@ -12,16 +13,87 @@ public final class DivComponent extends CssAwareComponent {
             TagAttribute.CLASS.getProperty(), TagAttribute.ID.getProperty(),
             TagAttribute.STYLE.getProperty(), TagAttribute.DATA.getProperty(),
             TagAttribute.ROLE.getProperty(), TagAttribute.TITLE.getProperty(),
-            TagAttribute.SUBTITLE.getProperty()
+            TagAttribute.SUBTITLE.getProperty(), TagAttribute.DATA_TEXT.getProperty(),
+            TagAttribute.DATA_TOOLTIP.getProperty(), TagAttribute.DATA_THEME.getProperty(),
+            TagAttribute.DATA_ANIMATION.getProperty(), TagAttribute.DATA_DELAY.getProperty()
     );
+
+    private String tooltip = "";
+    private String role = "";
+    private String theme = TagAttribute.THEME_DEFAULT.getProperty();
 
     public DivComponent() {
         super(HtmlTag.DIV.getTagName(), DIV_ATTRIBUTES);
     }
 
     @Override
+    protected void processSpecificAttributes(MinecraftRenderContext context) {
+        role = getAttribute(TagAttribute.ROLE.getProperty(), "");
+        tooltip = getAttribute(TagAttribute.DATA_TOOLTIP.getProperty(), "");
+        theme = getAttribute(TagAttribute.DATA_THEME.getProperty(), TagAttribute.THEME_DEFAULT.getProperty());
+
+        applyRoleSpecificBehavior();
+        applyThemeFromClasses();
+    }
+
+    //TODO: banner
+    private void applyRoleSpecificBehavior() {
+        switch (role) {
+            case "banner" -> {
+                if (!hasClass(TagAttribute.BANNER.getProperty())) {
+                    // Comportement spécifique aux bannières
+                }
+            }
+            case "navigation" -> {
+                if (!hasClass(TagAttribute.NAV.getProperty())) {
+                    // Comportement spécifique à la navigation
+                }
+            }
+            case "main" -> {
+                if (!hasClass(TagAttribute.MAIN_CONTENT.getProperty())) {
+                    // Comportement spécifique au contenu principal
+                }
+            }
+            case "complementary" -> {
+                if (!hasClass(TagAttribute.SIDEBAR.getProperty())) {
+                    // Comportement spécifique aux sidebars
+                }
+            }
+        }
+    }
+
+    private void applyThemeFromClasses() {
+        if (hasClass(TagAttribute.DARK_THEME.getProperty())) {
+            theme = TagAttribute.THEME_DARK.getProperty();
+        } else if (hasClass(TagAttribute.LIGHT_THEME.getProperty())) {
+            theme = TagAttribute.THEME_LIGHT.getProperty();
+        } else if (hasClass(TagAttribute.PRIMARY.getProperty())) {
+            theme = TagAttribute.THEME_PRIMARY.getProperty();
+        } else if (hasClass(TagAttribute.SUCCESS.getProperty())) {
+            theme = TagAttribute.THEME_SUCCESS.getProperty();
+        } else if (hasClass(TagAttribute.DANGER.getProperty())) {
+            theme = TagAttribute.THEME_DANGER.getProperty();
+        }
+
+        applyTheme();
+    }
+
+    private void applyTheme() {
+        if (backgroundColor == 0x00000000) {
+            switch (theme) {
+                case "dark" -> setBackgroundColor(ColorUtils.parseColor("#2c3e50"));
+                case "light" -> setBackgroundColor(ColorUtils.parseColor("#f8f9fa"));
+                case "primary" -> setBackgroundColor(ColorUtils.parseColor("#3498db"));
+                case "success" -> setBackgroundColor(ColorUtils.parseColor("#2ecc71"));
+                case "danger" -> setBackgroundColor(ColorUtils.parseColor("#e74c3c"));
+            }
+        }
+    }
+
+    @Override
     protected void renderContent(MinecraftRenderContext context, int x, int y, int width, int height) {
         renderText(context, x, y, width, height);
+        renderTooltip(context, x, y, width, height);
     }
 
     private void renderText(MinecraftRenderContext context, int x, int y, int width, int height) {
@@ -33,21 +105,36 @@ public final class DivComponent extends CssAwareComponent {
         }
     }
 
+    private void renderTooltip(MinecraftRenderContext context, int x, int y, int width, int height) {
+        if (!tooltip.isEmpty() && shouldShowTooltip()) {
+            context.drawText(tooltip, x, y - 20, ColorUtils.parseColor("white"));
+        }
+    }
+
+    private boolean shouldShowTooltip() {
+        return false; // Placeholder
+    }
+
     private String getTextContent() {
-        return getAttribute("data-text", "");
+        return getAttribute(TagAttribute.DATA_TEXT.getProperty(), "");
     }
 
     private int getTextColor() {
-        if (hasClass("title")) return 0xFFFFFFFF;
-        if (hasClass("subtitle")) return 0xFFCCCCCC;
-        if (hasClass("section-title")) return 0xFF4CAF50;
-        if (hasClass("status-ok")) return 0xFF4CAF50;
-        return 0xFFE0E0E0;
+        if (hasClass(TagAttribute.TITLE.getProperty())) return ColorUtils.parseColor("white");
+        if (hasClass(TagAttribute.SUBTITLE.getProperty())) return ColorUtils.parseColor("lightgray");
+        if (hasClass(TagAttribute.SECTION_TITLE.getProperty())) return ColorUtils.parseColor("lime");
+        if (hasClass(TagAttribute.STATUS_OK.getProperty())) return ColorUtils.parseColor("lime");
+
+        return switch (theme) {
+            case "dark" -> ColorUtils.parseColor("#ecf0f1");
+            case "light" -> ColorUtils.parseColor("#2c3e50");
+            default -> ColorUtils.parseColor("#e0e0e0");
+        };
     }
 
     @Override
     protected void onViewportStatusChanged(boolean inViewport) {
-        if (hasClass("animated")) {
+        if (hasClass(TagAttribute.ANIMATED.getProperty())) {
             if (inViewport) {
                 startAnimations();
             } else {

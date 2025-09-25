@@ -5,6 +5,7 @@ import com.edgn.prog.component.attribute.TagAttribute;
 import com.edgn.prog.component.html.HtmlTag;
 import com.edgn.prog.component.html.components.CssAwareComponent;
 import com.edgn.prog.minecraft.MinecraftRenderContext;
+import com.edgn.utils.ColorUtils;
 
 import java.util.Set;
 
@@ -20,8 +21,34 @@ public final class HeaderComponent extends CssAwareComponent {
     }
 
     @Override
+    protected void processSpecificAttributes(MinecraftRenderContext context) {
+        String role = getAttribute(TagAttribute.ROLE.getProperty(), "");
+        if (role.equals(TagAttribute.ROLE_BANNER.getProperty()) &&
+                !hasClass(TagAttribute.SITE_HEADER.getProperty())) {
+            applySiteBannerBehavior();
+        }
+        applyHeaderTheme();
+    }
+
+    private void applySiteBannerBehavior() {
+        if (backgroundColor == 0x00000000 && !hasClass(TagAttribute.CUSTOM_HEADER.getProperty())) {
+            setBackgroundColor(ColorUtils.parseColor("#34495e"));
+        }
+    }
+
+    private void applyHeaderTheme() {
+        if (backgroundColor == 0x00000000) {
+            if (hasClass(TagAttribute.DARK_THEME.getProperty())) {
+                setBackgroundColor(ColorUtils.parseColor("#2c3e50"));
+            } else if (hasClass(TagAttribute.PRIMARY.getProperty())) {
+                setBackgroundColor(ColorUtils.parseColor("#3498db"));
+            }
+        }
+    }
+
+    @Override
     @KeepEmpty
     protected void renderContent(MinecraftRenderContext context, int x, int y, int width, int height) {
-        //inherited by children
+        // Le contenu est rendu par les enfants
     }
 }

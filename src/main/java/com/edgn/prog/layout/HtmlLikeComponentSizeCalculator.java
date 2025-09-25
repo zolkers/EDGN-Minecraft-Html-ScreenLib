@@ -4,6 +4,7 @@ import com.edgn.prog.component.attribute.TagAttribute;
 import com.edgn.prog.component.html.HtmlTag;
 import com.edgn.prog.component.html.components.CssAwareComponent;
 import com.edgn.prog.layout.config.ComponentDimensions;
+import com.edgn.prog.layout.spacing.Margin;
 import com.edgn.prog.minecraft.MinecraftRenderContext;
 
 public class HtmlLikeComponentSizeCalculator implements ComponentSizeCalculator {
@@ -46,19 +47,19 @@ public class HtmlLikeComponentSizeCalculator implements ComponentSizeCalculator 
         
         return 0;
     }
-    
+
     private int calculateChildrenTotalHeight(CssAwareComponent component) {
         int totalHeight = 0;
-        
+
         for (var child : component.getChildren()) {
             if (child instanceof CssAwareComponent cssChild) {
                 totalHeight += calculateHeight(cssChild, null, 0);
-                
-                int[] margins = cssChild.getMargin();
-                totalHeight += margins[0] + margins[2];
+
+                Margin margins = cssChild.getMargin();
+                totalHeight += margins.vertical();
             }
         }
-        
+
         return totalHeight;
     }
     

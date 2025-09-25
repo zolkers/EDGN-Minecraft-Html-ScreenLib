@@ -2,6 +2,8 @@ package com.edgn.prog.layout;
 
 import com.edgn.prog.component.html.EdgnComponent;
 import com.edgn.prog.component.html.components.CssAwareComponent;
+import com.edgn.prog.layout.spacing.Margin;
+import com.edgn.prog.layout.spacing.Padding;
 import com.edgn.prog.minecraft.MinecraftRenderContext;
 
 import java.util.List;
@@ -39,27 +41,25 @@ public record HtmlLikeLayoutEngine(ComponentSizeCalculator sizeCalculator) imple
     private void layoutChildren(List<EdgnComponent> children, CssAwareComponent parent, MinecraftRenderContext context) {
         int parentX = parent.getCalculatedX();
         int parentY = parent.getCalculatedY();
-        int parentWidth = parent.getCalculatedWidth();
-        int[] parentPadding = parent.getPadding();
+        Padding parentPadding = parent.getPadding();
 
-        int contentX = parentX + parentPadding[3];
-        int contentY = parentY + parentPadding[0];
-        int contentWidth = parentWidth - parentPadding[1] - parentPadding[3];
+        int contentX = parentX + parentPadding.left();
+        int contentY = parentY + parentPadding.top();
+        int contentWidth = parent.getBoxModel().contentWidth();
 
         int currentY = contentY;
 
         for (EdgnComponent child : children) {
             if (child instanceof CssAwareComponent cssChild) {
-                int[] childMargin = cssChild.getMargin();
+                Margin childMargin = cssChild.getMargin();
 
-                currentY += childMargin[0];
+                currentY += childMargin.top();
 
-                int childWidth = Math.min(cssChild.getCalculatedWidth(), contentWidth);
-                int childHeight = cssChild.getCalculatedHeight();
+                int childWidth = Math.min(cssChild.getBoxModel().width(), contentWidth);
+                int childHeight = cssChild.getBoxModel().height();
 
                 cssChild.setCalculatedBounds(contentX, currentY, childWidth, childHeight);
-
-                currentY += childHeight + childMargin[2];
+                currentY += childHeight + childMargin.bottom();
 
                 if (!child.getChildren().isEmpty()) {
                     layoutChildren(child.getChildren(), cssChild, context);

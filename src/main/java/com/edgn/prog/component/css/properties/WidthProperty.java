@@ -14,7 +14,7 @@ public final class WidthProperty extends AbstractCssProperty {
 
     @Override
     public Object calculateValue(String value, MinecraftRenderContext context) {
-        return CssUnitParser.parseSize(value, context.width(), context.height(), context);
+        return CssUnitParser.parseSize(value, context.width(), context.height(), context, CssUnitParser.Direction.HORIZONTAL);
     }
 
     @Override
@@ -27,7 +27,7 @@ public final class WidthProperty extends AbstractCssProperty {
     @Override
     public void apply(EdgnComponent component, String value, MinecraftRenderContext context) {
         if (component instanceof SizedComponent sized) {
-            int width = CssUnitParser.parseSize(value, context.width(), context.height(), context);
+            int width = CssUnitParser.parseSize(value, context.width(), context.height(), context, CssUnitParser.Direction.HORIZONTAL);
             sized.setWidth(width);
         }
     }
