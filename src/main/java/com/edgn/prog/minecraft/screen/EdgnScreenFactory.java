@@ -1,5 +1,7 @@
 package com.edgn.prog.minecraft.screen;
 
+import com.edgn.prog.minecraft.screen.screens.PathBasedEdgnScreen;
+import com.edgn.prog.minecraft.screen.screens.StandardResourceEdgnScreen;
 import net.minecraft.text.Text;
 
 public final class EdgnScreenFactory {

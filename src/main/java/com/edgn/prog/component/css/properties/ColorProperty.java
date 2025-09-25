@@ -2,13 +2,14 @@ package com.edgn.prog.component.css.properties;
 
 import com.edgn.prog.component.TextComponent;
 import com.edgn.prog.component.css.AbstractCssProperty;
+import com.edgn.prog.component.css.CssPropertyName;
 import com.edgn.prog.component.html.EdgnComponent;
 import com.edgn.prog.minecraft.MinecraftRenderContext;
 import com.edgn.utils.ColorUtils;
 
 public final class ColorProperty extends AbstractCssProperty {
     public ColorProperty() {
-        super("color");
+        super(CssPropertyName.COLOR.getPropertyName());
     }
 
     @Override
@@ -20,7 +21,6 @@ public final class ColorProperty extends AbstractCssProperty {
     }
 
     private int parseColor(String colorStr) {
-        // Same logic as BackgroundColorProperty
         return ColorUtils.parseColor(colorStr);
     }
 }

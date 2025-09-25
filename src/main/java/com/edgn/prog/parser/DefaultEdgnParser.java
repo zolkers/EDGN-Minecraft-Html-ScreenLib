@@ -1,5 +1,6 @@
 package com.edgn.prog.parser;
 
+import com.edgn.prog.component.attribute.TagAttribute;
 import com.edgn.prog.component.html.EdgnComponent;
 import com.edgn.prog.component.html.ComponentRegistry;
 import com.edgn.prog.component.html.EdgnComponentRegistry;
@@ -22,6 +23,11 @@ public final class DefaultEdgnParser implements EdgnParser {
 
     public DefaultEdgnParser() {
         this.registry = EdgnComponentRegistry.getInstance();
+        this.tokenizer = new HtmlEdgnTokenizer(registry);
+    }
+
+    public DefaultEdgnParser(ComponentRegistry registry) {
+        this.registry = registry;
         this.tokenizer = new HtmlEdgnTokenizer(registry);
     }
 
@@ -82,29 +88,23 @@ public final class DefaultEdgnParser implements EdgnParser {
             component.applyAttribute(attrName.value(), attrValue.value());
         }
     }
-
     private void parseChildren(TokenIterator tokens, EdgnComponent parent, String expectedClosingTag)
             throws EdgnParsingException, ComponentCreationException {
 
-        StringBuilder textContent = new StringBuilder();
+        StringBuilder currentTextContent = new StringBuilder();
 
         while (tokens.hasNext()) {
             EdgnToken token = tokens.peek();
 
             switch (token.type()) {
                 case OPEN_TAG -> {
-                    if (!textContent.isEmpty()) {
-                        parent.applyAttribute("data-text", textContent.toString().trim());
-                        textContent.setLength(0);
-                    }
+                    saveAccumulatedText(parent, currentTextContent);
 
                     EdgnComponent child = parseTokens(tokens);
                     parent.addChild(child);
                 }
                 case CLOSE_TAG -> {
-                    if (!textContent.isEmpty()) {
-                        parent.applyAttribute("data-text", textContent.toString().trim());
-                    }
+                    saveAccumulatedText(parent, currentTextContent);
 
                     tokens.next();
                     if (!token.value().equals(expectedClosingTag)) {
@@ -115,7 +115,7 @@ public final class DefaultEdgnParser implements EdgnParser {
                 }
                 case TEXT_CONTENT -> {
                     tokens.next();
-                    textContent.append(token.value()).append(" ");
+                    currentTextContent.append(token.value()).append(" ");
                 }
                 case TAG_END, WHITESPACE -> tokens.next();
                 default -> throw new EdgnParsingException("Unexpected token: " + token.type() +
@@ -124,6 +124,16 @@ public final class DefaultEdgnParser implements EdgnParser {
         }
 
         throw new EdgnParsingException("Unclosed tag: " + expectedClosingTag);
+    }
+
+    private void saveAccumulatedText(EdgnComponent parent, StringBuilder textContent) {
+        if (!textContent.isEmpty()) {
+            String text = textContent.toString().trim();
+            if (!text.isEmpty()) {
+                parent.applyAttribute(TagAttribute.DATA_TEXT.getProperty(), text);
+            }
+            textContent.setLength(0);
+        }
     }
 
     private String loadResource(String resourcePath) throws IOException {

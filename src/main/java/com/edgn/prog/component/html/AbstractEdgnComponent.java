@@ -1,5 +1,7 @@
 package com.edgn.prog.component.html;
 
+import com.edgn.prog.component.attribute.TagAttribute;
+
 import java.util.*;
 
 public abstract class AbstractEdgnComponent implements EdgnComponent {
@@ -20,7 +22,7 @@ public abstract class AbstractEdgnComponent implements EdgnComponent {
 
     @Override
     public void applyAttribute(String name, String value) {
-        if (!validAttributes.contains(name) && !name.startsWith("data-")) {
+        if (!validAttributes.contains(name) && !name.startsWith(TagAttribute.DATA_BEGIN.getProperty())) {
             throw new IllegalArgumentException("Attribute '" + name + "' is not valid for " + tagName + " component");
         }
         attributes.put(name, value);
@@ -36,15 +38,15 @@ public abstract class AbstractEdgnComponent implements EdgnComponent {
         return Collections.unmodifiableList(children);
     }
 
-    protected String getAttribute(String name, String defaultValue) {
+    public String getAttribute(String name, String defaultValue) {
         return attributes.getOrDefault(name, defaultValue);
     }
 
     protected String getClassList() {
-        return getAttribute("class", "");
+        return getAttribute(TagAttribute.CLASS.getProperty(), "");
     }
 
-    protected boolean hasClass(String className) {
+    public boolean hasClass(String className) {
         String classList = getClassList();
         return Arrays.asList(classList.split("\\s+")).contains(className);
     }

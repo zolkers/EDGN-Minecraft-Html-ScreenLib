@@ -1,25 +1,15 @@
 package com.edgn.prog.component.css.properties;
+
 import com.edgn.prog.component.RenderableComponent;
 import com.edgn.prog.component.css.AbstractCssProperty;
+import com.edgn.prog.component.css.CssPropertyName;
 import com.edgn.prog.component.html.EdgnComponent;
 import com.edgn.prog.minecraft.MinecraftRenderContext;
 import com.edgn.utils.ColorUtils;
 
 public final class BackgroundColorProperty extends AbstractCssProperty {
     public BackgroundColorProperty() {
-        super("background-color");
-    }
-
-    @Override
-    public Object calculateValue(String value, MinecraftRenderContext context) {
-        return ColorUtils.parseColor(value);
-    }
-
-    @Override
-    public void applyCalculatedValue(EdgnComponent component, Object calculatedValue) {
-        if (component instanceof RenderableComponent renderable && calculatedValue instanceof Integer color) {
-            renderable.setBackgroundColor(color);
-        }
+        super(CssPropertyName.BACKGROUND_COLOR.getPropertyName());
     }
 
     @Override

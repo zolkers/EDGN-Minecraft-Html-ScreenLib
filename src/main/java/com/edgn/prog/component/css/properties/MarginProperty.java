@@ -2,13 +2,14 @@ package com.edgn.prog.component.css.properties;
 
 import com.edgn.prog.component.MarginComponent;
 import com.edgn.prog.component.css.AbstractCssProperty;
+import com.edgn.prog.component.css.CssPropertyName;
 import com.edgn.prog.component.html.EdgnComponent;
 import com.edgn.prog.minecraft.MinecraftRenderContext;
 import com.edgn.prog.parser.units.CssUnitParser;
 
 public final class MarginProperty extends AbstractCssProperty {
     public MarginProperty() {
-        super("margin");
+        super(CssPropertyName.MARGIN.getPropertyName());
     }
 
     @Override

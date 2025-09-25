@@ -2,13 +2,14 @@ package com.edgn.prog.component.css.properties;
 
 import com.edgn.prog.component.PaddedComponent;
 import com.edgn.prog.component.css.AbstractCssProperty;
+import com.edgn.prog.component.css.CssPropertyName;
 import com.edgn.prog.component.html.EdgnComponent;
 import com.edgn.prog.minecraft.MinecraftRenderContext;
 import com.edgn.prog.parser.units.CssUnitParser;
 
 public final class PaddingProperty extends AbstractCssProperty {
     public PaddingProperty() {
-        super("padding");
+        super(CssPropertyName.PADDING.getPropertyName());
     }
 
     @Override

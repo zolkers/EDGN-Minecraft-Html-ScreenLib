@@ -49,7 +49,7 @@ public final class EdgnResourceLoader {
             String content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
             if (content.trim().isEmpty()) {
-                throw new EdgnParsingException(type + " file is empty: " + resourcePath);
+                HTMLMyScreen.LOGGER.warn("{} file is empty: {}", type, resourcePath);
             }
 
             System.out.println("EDGN: Successfully loaded " + type + " (" + content.length() + " characters)");
