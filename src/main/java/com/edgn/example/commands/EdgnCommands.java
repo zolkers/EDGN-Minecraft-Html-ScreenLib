@@ -18,7 +18,7 @@ public final class EdgnCommands {
     
     private static void registerOpenScreenCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(
-            CommandManager.literal("edgn")
+            CommandManager.literal("hms")
                 .then(CommandManager.literal("open")
                     .then(CommandManager.literal("example")
                         .executes(EdgnCommands::openExampleScreen)

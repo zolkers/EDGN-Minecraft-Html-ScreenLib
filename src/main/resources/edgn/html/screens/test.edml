@@ -1,5 +1,0 @@
-<body class="light-theme" data-responsive="true" data-text="body">
-    <main role="main" class="content-area" data-text="main">
-        <div class="content-block" id="hero" data-theme="primary" data-text="div"></div>
-    </main>
-</body>
