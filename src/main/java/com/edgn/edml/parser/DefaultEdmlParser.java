@@ -1,9 +1,9 @@
 package com.edgn.edml.parser;
 
 import com.edgn.edml.component.attribute.TagAttribute;
-import com.edgn.edml.component.html.EdmlComponent;
-import com.edgn.edml.component.html.ComponentRegistry;
-import com.edgn.edml.component.html.EdmlComponentRegistry;
+import com.edgn.edml.component.edml.component.EdmlComponent;
+import com.edgn.edml.component.edml.component.ComponentRegistry;
+import com.edgn.edml.component.edml.component.EdmlComponentRegistry;
 import com.edgn.edml.exceptions.ComponentCreationException;
 import com.edgn.edml.exceptions.EdmlParsingException;
 import com.edgn.edml.exceptions.LexerException;

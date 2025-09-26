@@ -1,11 +1,10 @@
 package com.edgn.edml.data.binding;
 
-import com.edgn.edml.component.html.EdmlComponent;
-import com.edgn.edml.component.html.EdmlEnum;
+import com.edgn.edml.component.edml.component.EdmlComponent;
+import com.edgn.edml.component.edml.EdmlEnum;
 import com.edgn.edml.component.attribute.TagAttribute;
-import com.edgn.edml.component.edss.EdssPropertyName;
-import com.edgn.edml.component.html.components.EdssAwareComponent;
-import com.edgn.edml.component.html.components.elements.TextComponent;
+import com.edgn.edml.component.edml.components.EdssAwareComponent;
+import com.edgn.edml.component.edml.components.elements.TextComponent;
 import com.edgn.edml.data.BindableComponent;
 
 import java.util.HashSet;

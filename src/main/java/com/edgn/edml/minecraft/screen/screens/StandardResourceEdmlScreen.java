@@ -1,12 +1,17 @@
 package com.edgn.edml.minecraft.screen.screens;
 
+import com.edgn.HTMLMyScreen;
+import com.edgn.edml.annotations.AwaitOverride;
 import com.edgn.edml.component.attribute.AttributeProcessor;
 import com.edgn.edml.component.attribute.TagAttribute;
-import com.edgn.edml.component.edss.IEdssRegistry;
-import com.edgn.edml.component.edss.EdssRule;
-import com.edgn.edml.component.edss.EdssRegistry;
-import com.edgn.edml.component.html.AbstractEdmlComponent;
-import com.edgn.edml.component.html.EdmlComponent;
+import com.edgn.edml.component.edml.component.AbstractEdmlComponent;
+import com.edgn.edml.component.edml.component.EdmlComponent;
+import com.edgn.edml.component.edml.scroll.ScrollManager;
+import com.edgn.edml.component.edss.property.EdssRegistry;
+import com.edgn.edml.component.edss.property.EdssRule;
+import com.edgn.edml.component.edss.property.IEdssRegistry;
+import com.edgn.edml.data.binding.AdvancedBindingContext;
+import com.edgn.edml.data.binding.DataBindingEngine;
 import com.edgn.edml.exceptions.EdssParsingException;
 import com.edgn.edml.exceptions.EdmlParsingException;
 import com.edgn.edml.layout.sizing.IComponentSizeCalculator;
@@ -27,11 +32,13 @@ import net.minecraft.text.Text;
 
 import java.util.List;
 
-public final class StandardResourceEdmlScreen extends EdmlScreen {
+public class StandardResourceEdmlScreen extends EdmlScreen {
     private final EdmlComponent rootComponent;
     private final List<EdssRule> cssRules;
     private final IEdssRegistry cssRegistry;
     private final ILayoutEngine layoutEngine;
+    private final AdvancedBindingContext bindingContext;
+    private final DataBindingEngine bindingEngine;
 
     public StandardResourceEdmlScreen(Text title, String resourceName) {
         this(title, resourceName, resourceName);
@@ -40,6 +47,8 @@ public final class StandardResourceEdmlScreen extends EdmlScreen {
     public StandardResourceEdmlScreen(Text title, String htmlName, String cssName) {
         super(title);
         this.cssRegistry = EdssRegistry.getInstance();
+        this.bindingContext = new AdvancedBindingContext();
+        this.bindingEngine = new DataBindingEngine(bindingContext);
 
         IComponentSizeCalculator sizeCalculator = new ComponentSizeCalculator();
         this.layoutEngine = new LayoutEngine(sizeCalculator);
@@ -56,9 +65,21 @@ public final class StandardResourceEdmlScreen extends EdmlScreen {
 
             applyCssToComponents();
 
+            initializeData();
+
+            bindingEngine.processComponent(rootComponent);
+
+            HTMLMyScreen.LOGGER.info("StandardResourceEdmlScreen initialized with data binding: {}/{}", htmlName, cssName);
+
         } catch (EdmlParsingException | EdssParsingException e) {
+            HTMLMyScreen.LOGGER.error("Failed to load EDGN screen: {}/{} - {}", htmlName, cssName, e.getMessage());
             throw new RuntimeException("Failed to load EDGN screen: " + htmlName + "/" + cssName + " - " + e.getMessage(), e);
         }
+    }
+
+    @AwaitOverride
+    protected void initializeData() {
+        // Hook method - override in subclasses
     }
 
     private void applyCssToComponents() {
@@ -131,6 +152,34 @@ public final class StandardResourceEdmlScreen extends EdmlScreen {
             layoutEngine.layoutComponent(rootComponent, renderContext);
             rootComponent.render(renderContext);
         }
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        boolean handled = ScrollManager.getInstance().handleScrollEvent(mouseX, mouseY, horizontalAmount, verticalAmount);
+        if (handled) {
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+    }
+
+    @Override
+    public void close() {
+        ScrollManager.getInstance().dispose();
+        bindingEngine.dispose();
+        super.close();
+    }
+
+    public AdvancedBindingContext getBindingContext() {
+        return bindingContext;
+    }
+
+    public DataBindingEngine getBindingEngine() {
+        return bindingEngine;
+    }
+
+    public EdmlComponent getRootComponent() {
+        return rootComponent;
     }
 
     private record WindowSizeContext(int width, int height) implements MinecraftRenderContext {}

@@ -1,6 +1,6 @@
 package com.edgn.edml.parser;
 
-import com.edgn.edml.component.edss.EdssRule;
+import com.edgn.edml.component.edss.property.EdssRule;
 import com.edgn.edml.exceptions.EdssParsingException;
 
 import java.util.List;

@@ -1,15 +1,14 @@
 package com.edgn.edml.component.edss.properties;
 
 import com.edgn.edml.component.SizedComponent;
-import com.edgn.edml.component.edss.AbstractEdssProperty;
-import com.edgn.edml.component.edss.EdssPropertyName;
-import com.edgn.edml.component.html.EdmlComponent;
+import com.edgn.edml.component.edss.property.AbstractEdssProperty;
+import com.edgn.edml.component.edml.component.EdmlComponent;
 import com.edgn.edml.minecraft.MinecraftRenderContext;
 import com.edgn.edml.parser.units.EdssUnitParser;
 
 public final class WidthProperty extends AbstractEdssProperty {
     public WidthProperty() {
-        super(EdssPropertyName.WIDTH.getPropertyName());
+        super("width");
     }
 
     @Override

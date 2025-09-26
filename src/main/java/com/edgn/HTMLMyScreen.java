@@ -1,6 +1,5 @@
 package com.edgn;
 
-import com.edgn.example.commands.EdgnCommands;
 import com.edgn.example.screens.ScreenOpener;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -37,7 +36,5 @@ public final class HTMLMyScreen implements ModInitializer {
                 ScreenOpener.openTestScreen();
             }
         });
-
-        EdgnCommands.register();
     }
 }

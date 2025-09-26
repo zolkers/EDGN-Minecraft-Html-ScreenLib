@@ -9,7 +9,6 @@ public enum TagAttribute {
     ALT("alt"),
     TITLE("title"),
     SUBTITLE("subtitle"),
-
     DATA_BIND("data-bind"),
     DATA_VISIBLE("data-visible"),
     DATA_CLASS("data-class"),

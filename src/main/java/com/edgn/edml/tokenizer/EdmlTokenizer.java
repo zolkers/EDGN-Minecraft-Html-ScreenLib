@@ -1,6 +1,6 @@
 package com.edgn.edml.tokenizer;
 
-import com.edgn.edml.component.html.ComponentRegistry;
+import com.edgn.edml.component.edml.component.ComponentRegistry;
 import com.edgn.edml.exceptions.LexerException;
 import com.edgn.edml.tokenizer.enums.TokenType;
 import com.edgn.edml.tokenizer.enums.TokenizerState;

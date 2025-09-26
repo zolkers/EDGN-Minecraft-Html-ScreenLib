@@ -1,6 +1,6 @@
 package com.edgn.edml.parser;
 
-import com.edgn.edml.component.edss.EdssRule;
+import com.edgn.edml.component.edss.property.EdssRule;
 
 import java.util.ArrayList;
 import java.util.HashMap;

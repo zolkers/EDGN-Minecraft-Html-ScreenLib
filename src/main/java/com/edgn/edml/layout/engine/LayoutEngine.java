@@ -1,8 +1,8 @@
 package com.edgn.edml.layout.engine;
 
-import com.edgn.edml.component.html.EdmlComponent;
-import com.edgn.edml.component.html.EdmlEnum;
-import com.edgn.edml.component.html.components.EdssAwareComponent;
+import com.edgn.edml.component.edml.component.EdmlComponent;
+import com.edgn.edml.component.edml.EdmlEnum;
+import com.edgn.edml.component.edml.components.EdssAwareComponent;
 import com.edgn.edml.layout.sizing.IComponentSizeCalculator;
 import com.edgn.edml.layout.spacing.Margin;
 import com.edgn.edml.layout.spacing.Padding;

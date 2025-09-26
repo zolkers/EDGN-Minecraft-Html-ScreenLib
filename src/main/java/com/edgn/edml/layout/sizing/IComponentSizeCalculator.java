@@ -1,6 +1,6 @@
 package com.edgn.edml.layout.sizing;
 
-import com.edgn.edml.component.html.components.EdssAwareComponent;
+import com.edgn.edml.component.edml.components.EdssAwareComponent;
 import com.edgn.edml.minecraft.MinecraftRenderContext;
 
 public interface IComponentSizeCalculator {

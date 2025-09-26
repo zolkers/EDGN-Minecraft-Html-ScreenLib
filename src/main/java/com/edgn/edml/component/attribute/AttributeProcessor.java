@@ -1,7 +1,7 @@
 package com.edgn.edml.component.attribute;
 
-import com.edgn.edml.component.edss.IEdssRegistry;
-import com.edgn.edml.component.edss.EdssRule;
+import com.edgn.edml.component.edss.property.IEdssRegistry;
+import com.edgn.edml.component.edss.property.EdssRule;
 import com.edgn.edml.minecraft.MinecraftRenderContext;
 
 import java.util.List;

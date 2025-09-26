@@ -1,0 +1,68 @@
+<body class="test-container">
+    <header class="main-header">
+        <div data-text="{{mainTitle}}" class="main-title"></div>
+
+         <div data-text="Time: {{currentTime}}" class="time-display"></div>
+    </header>
+
+    <main class="test-content">
+        <section class="test-section">
+            <div data-text="{{virtualListTitle}}" class="section-title"></div>
+            <div class="test-grid">
+                <div class="test-item">
+                    <div data-text="Large List ({{largeItemCount}} items)" class="item-title"></div>
+                    <div id="large-list"
+                         data-for="item in largeItems"
+                         data-template="&lt;div class='large-item'&gt;{{item}} - Index {{index}}&lt;/div&gt;"
+                         data-item-height="40"
+                         class="large-virtual-list">
+                    </div>
+                </div>
+
+                <div class="test-item">
+                    <div data-text="Small List ({{smallItemCount}} items)" class="item-title"></div>
+                    <div id="small-list"
+                         data-for="item in smallItems"
+                         data-template="&lt;div class='small-item'&gt;{{item}}&lt;/div&gt;"
+                         data-item-height="30"
+                         class="small-virtual-list">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="test-section">
+            <div data-text="{{spacingTitle}}" class="section-title"></div>
+            <div data-text="{{spacingInfo}}" class="section-info"></div>
+            <div class="spacing-demo">
+                <div style="margin-top: 20px; margin-bottom: 15px; background-color: #e3f2fd; padding: 10px;">
+                    <div data-text="margin-top: 20px, margin-bottom: 15px"></div>
+                </div>
+                <div style="padding-top: 25px; padding-left: 30px; padding-right: 10px; padding-bottom: 5px; background-color: #f3e5f5;">
+                    <div data-text="Individual paddings: top 25px, left 30px, right 10px, bottom 5px"></div>
+                </div>
+                <div style="margin-left: 40px; margin-right: 20px; background-color: #e8f5e8; padding: 15px;">
+                    <div data-text="margin-left: 40px, margin-right: 20px"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="test-section">
+            <div data-text="{{bindingTitle}}" class="section-title"></div>
+            <div data-text="{{dynamicText}}" class="dynamic-text"></div>
+            <div class="notifications-container">
+                <div data-text="Live Notifications" class="notifications-title"></div>
+                <div id="notifications-list"
+                     data-for="notification in notifications"
+                     data-template="&lt;div class='notification'&gt;{{notification}}&lt;/div&gt;"
+                     data-item-height="25"
+                     class="notifications-list">
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="test-footer">
+        <div data-text="All features working: Virtual lists, Data binding, Individual margin/padding properties" class="footer-text"></div>
+    </footer>
+</body>
