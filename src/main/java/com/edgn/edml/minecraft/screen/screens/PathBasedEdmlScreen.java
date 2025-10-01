@@ -1,15 +1,22 @@
 package com.edgn.edml.minecraft.screen.screens;
 
 import com.edgn.HTMLMyScreen;
+import com.edgn.edml.component.ClickableComponent;
+import com.edgn.edml.component.DraggableComponent;
+import com.edgn.edml.component.ResizableComponent;
 import com.edgn.edml.component.attribute.AttributeProcessor;
 import com.edgn.edml.component.attribute.TagAttribute;
-import com.edgn.edml.component.edss.property.IEdssRegistry;
-import com.edgn.edml.component.edss.property.EdssRule;
-import com.edgn.edml.component.edss.property.EdssRegistry;
 import com.edgn.edml.component.edml.component.AbstractEdmlComponent;
 import com.edgn.edml.component.edml.component.EdmlComponent;
+import com.edgn.edml.component.edml.components.scroll.ScrollManager;
+import com.edgn.edml.component.edss.property.EdssRegistry;
+import com.edgn.edml.component.edss.property.EdssRule;
+import com.edgn.edml.component.edss.property.IEdssRegistry;
 import com.edgn.edml.data.binding.BindingContext;
 import com.edgn.edml.data.binding.DataBindingEngine;
+import com.edgn.edml.events.resize.ResizeEvent;
+import com.edgn.edml.events.resize.ResizeListener;
+import com.edgn.edml.events.resize.ResizeManager;
 import com.edgn.edml.exceptions.EdmlParsingException;
 import com.edgn.edml.exceptions.EdssParsingException;
 import com.edgn.edml.layout.sizing.IComponentSizeCalculator;
@@ -30,7 +37,7 @@ import net.minecraft.text.Text;
 
 import java.util.List;
 
-public final class PathBasedEdmlScreen extends EdmlScreen {
+public final class PathBasedEdmlScreen extends EdmlScreen implements ResizeListener {
     private final EdmlComponent rootComponent;
     private final List<EdssRule> cssRules;
     private final IEdssRegistry cssRegistry;
@@ -60,17 +67,46 @@ public final class PathBasedEdmlScreen extends EdmlScreen {
             applyCssToComponents();
             bindingEngine.processComponent(rootComponent);
 
-            HTMLMyScreen.LOGGER.info("PathBasedEdmlScreen initialized with data binding: {}/{}", htmlPath, cssPath);
+            ResizeManager.getInstance().addListener(this);
+
+            HTMLMyScreen.LOGGER.info("PathBasedEdmlScreen initialized: {}/{}", htmlPath, cssPath);
 
         } catch (EdmlParsingException | EdssParsingException e) {
             HTMLMyScreen.LOGGER.error("Failed to load EDGN screen: {}/{} - {}", htmlPath, cssPath, e.getMessage());
-            throw new RuntimeException("Failed to load EDGN screen: " + htmlPath + "/" + cssPath + " - " + e.getMessage(), e);
+            throw new RuntimeException("Failed to load EDGN screen: " + htmlPath + "/" + cssPath, e);
+        }
+    }
+
+    @Override
+    public void onResize(ResizeEvent event) {
+        HTMLMyScreen.LOGGER.debug("Screen resize: {}x{} -> {}x{}",
+                event.oldWidth(), event.oldHeight(),
+                event.newWidth(), event.newHeight());
+
+        performFullResize(event);
+    }
+
+    private void performFullResize(ResizeEvent event) {
+        var resizeContext = new WindowSizeContext(event.newWidth(), event.newHeight());
+
+        if (rootComponent instanceof ResizableComponent resizable) {
+            resizable.invalidateSize(resizeContext);
+            resizable.onParentResize(event);
+        }
+
+        applyCssToComponentTree(rootComponent, resizeContext);
+
+        if (rootComponent instanceof ResizableComponent resizable) {
+            resizable.markNeedsLayout();
         }
     }
 
     private void applyCssToComponents() {
         MinecraftClient client = MinecraftClient.getInstance();
-        var realContext = new WindowSizeContext(client.getWindow().getScaledWidth(), client.getWindow().getScaledHeight());
+        var realContext = new WindowSizeContext(
+                client.getWindow().getScaledWidth(),
+                client.getWindow().getScaledHeight()
+        );
 
         applyCssToComponentTree(rootComponent, realContext);
     }
@@ -129,31 +165,90 @@ public final class PathBasedEdmlScreen extends EdmlScreen {
     }
 
     @Override
+    protected void init() {
+        super.init();
+        ResizeManager.getInstance().updateDimensions(this.width, this.height);
+    }
+
+    @Override
+    public void resize(MinecraftClient client, int width, int height) {
+        super.resize(client, width, height);
+        ResizeManager.getInstance().updateDimensions(width, height);
+    }
+
+    @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
 
         if (rootComponent != null) {
             FabricRenderContext renderContext = new FabricRenderContext(context, this.width, this.height);
 
-            layoutEngine.layoutComponent(rootComponent, renderContext);
+            if (rootComponent instanceof ResizableComponent resizable && resizable.needsLayout()) {
+                layoutEngine.layoutComponent(rootComponent, renderContext);
+                resizable.clearNeedsLayout();
+            }
+
             rootComponent.render(renderContext);
         }
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        HTMLMyScreen.LOGGER.info("=== SCREEN mouseClicked: ({}, {}) button={} ===", mouseX, mouseY, button);
+
+        if (rootComponent instanceof ClickableComponent clickable) {
+            boolean handled = clickable.handleClick(mouseX, mouseY, button);
+            HTMLMyScreen.LOGGER.info("Root component handled: {}", handled);
+            return handled;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        if (rootComponent instanceof DraggableComponent draggable) {
+            if (draggable.handleDrag(mouseX, mouseY)) {
+                return true;
+            }
+        }
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (rootComponent instanceof DraggableComponent draggable) {
+            draggable.handleRelease();
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        bindingEngine.scrollList("virtual-list", (int) (-verticalAmount * 50));
+        boolean handled = ScrollManager.getInstance().handleScrollEvent(mouseX, mouseY, horizontalAmount, verticalAmount);
+        if (handled) {
+            return true;
+        }
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     @Override
     public void close() {
+        ResizeManager.getInstance().removeListener(this);
+        ScrollManager.getInstance().dispose();
         bindingEngine.dispose();
         super.close();
     }
 
     public BindingContext getBindingContext() {
         return bindingContext;
+    }
+
+    public DataBindingEngine getBindingEngine() {
+        return bindingEngine;
+    }
+
+    public EdmlComponent getRootComponent() {
+        return rootComponent;
     }
 
     private record WindowSizeContext(int width, int height) implements MinecraftRenderContext {}

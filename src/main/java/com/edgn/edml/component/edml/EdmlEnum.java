@@ -2,7 +2,7 @@ package com.edgn.edml.component.edml;
 
 public enum EdmlEnum {
     BODY("body"),
-    DIV("div"), 
+    DIV("div"),
     HEADER("header"),
     MAIN("main"),
     FOOTER("footer"),
@@ -17,18 +17,20 @@ public enum EdmlEnum {
     FORM("form"),
     IMG("img"),
     VIDEO("video"),
-    TEXT("text");
-    
+    TEXT("text"),
+    SCROLLBAR("scrollbar"),
+    VIRTUAL_LIST("virtual-list");
+
     private final String tagName;
-    
+
     EdmlEnum(String tagName) {
         this.tagName = tagName;
     }
-    
+
     public String getTagName() {
         return tagName;
     }
-    
+
     @Override
     public String toString() {
         return tagName;

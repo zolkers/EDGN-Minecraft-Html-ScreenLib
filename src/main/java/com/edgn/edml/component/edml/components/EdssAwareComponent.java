@@ -2,6 +2,7 @@ package com.edgn.edml.component.edml.components;
 
 import com.edgn.edml.annotations.AwaitOverride;
 import com.edgn.edml.component.RenderableComponent;
+import com.edgn.edml.component.ResizableComponent;
 import com.edgn.edml.component.SizedComponent;
 import com.edgn.edml.component.attribute.AttributeProcessor;
 import com.edgn.edml.component.attribute.TagAttribute;
@@ -12,6 +13,7 @@ import com.edgn.edml.component.edss.property.IEdssRegistry;
 import com.edgn.edml.component.edss.property.EdssRule;
 import com.edgn.edml.component.edml.component.AbstractEdmlComponent;
 import com.edgn.edml.component.edml.EdmlEnum;
+import com.edgn.edml.events.resize.ResizeEvent;
 import com.edgn.edml.layout.box.BoxModel;
 import com.edgn.edml.layout.box.BoxModelComponent;
 import com.edgn.edml.layout.spacing.Margin;
@@ -23,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class EdssAwareComponent extends AbstractEdmlComponent
-        implements RenderableComponent, SizedComponent, BoxModelComponent, VirtualComponent, AttributeProcessor {
+        implements RenderableComponent, SizedComponent, BoxModelComponent, VirtualComponent, AttributeProcessor, ResizableComponent {
 
     protected BoxModel boxModel;
     protected int backgroundColor = 0x00000000;
@@ -31,6 +33,9 @@ public abstract class EdssAwareComponent extends AbstractEdmlComponent
     protected int calculatedY = 0;
     protected boolean visible = true;
     protected VirtualBounds virtualBounds;
+    protected boolean needsLayout = true;
+    private boolean sizeInvalidated = false;
+    private MinecraftRenderContext cachedContext;
 
     protected EdssAwareComponent(String tagName, Set<String> validAttributes) {
         super(tagName, validAttributes);
@@ -48,18 +53,25 @@ public abstract class EdssAwareComponent extends AbstractEdmlComponent
     public void setBoxModel(BoxModel boxModel) {
         this.boxModel = boxModel;
         updateVirtualBounds();
+        markNeedsLayout();
     }
-
 
     @Override
     public void setWidth(int width) {
-        this.boxModel = new BoxModel(width, boxModel.height(), boxModel.padding(), boxModel.margin());
+        if (this.boxModel.width() != width) {
+            this.boxModel = new BoxModel(width, boxModel.height(), boxModel.padding(), boxModel.margin());
+            markNeedsLayout();
+        }
     }
 
     @Override
     public void setHeight(int height) {
-        int minHeight = 0;
-        this.boxModel = new BoxModel(boxModel.width(), Math.max(height, minHeight), boxModel.padding(), boxModel.margin());
+        int minHeight = getMinimumHeight();
+        int actualHeight = Math.max(height, minHeight);
+        if (this.boxModel.height() != actualHeight) {
+            this.boxModel = new BoxModel(boxModel.width(), actualHeight, boxModel.padding(), boxModel.margin());
+            markNeedsLayout();
+        }
     }
 
     @Override
@@ -83,7 +95,60 @@ public abstract class EdssAwareComponent extends AbstractEdmlComponent
     }
 
     @Override
+    public void invalidateSize(MinecraftRenderContext context) {
+        this.cachedContext = context;
+        this.sizeInvalidated = true;
+        markNeedsLayout();
+
+        for (var child : children) {
+            if (child instanceof ResizableComponent resizable) {
+                resizable.invalidateSize(context);
+            }
+        }
+    }
+
+    @Override
+    public void onParentResize(ResizeEvent event) {
+        boolean hasRelativeWidth = hasRelativeSizing(TagAttribute.WIDTH);
+        boolean hasRelativeHeight = hasRelativeSizing(TagAttribute.HEIGHT);
+
+        if (hasRelativeWidth || hasRelativeHeight) {
+            sizeInvalidated = true;
+            markNeedsLayout();
+        }
+
+        for (var child : children) {
+            if (child instanceof ResizableComponent resizable) {
+                resizable.onParentResize(event);
+            }
+        }
+    }
+
+    private boolean hasRelativeSizing(TagAttribute attr) {
+        String value = getAttribute(attr.getProperty(), "");
+        return value.contains("%") || value.contains("vw") || value.contains("vh");
+    }
+
+    @Override
+    public boolean needsLayout() {
+        return needsLayout || sizeInvalidated;
+    }
+
+    @Override
+    public void markNeedsLayout() {
+        this.needsLayout = true;
+    }
+
+    @Override
+    public void clearNeedsLayout() {
+        this.needsLayout = false;
+        this.sizeInvalidated = false;
+    }
+
+    @Override
     public final void render(MinecraftRenderContext context) {
+        this.cachedContext = context;
+
         if (!visible || !shouldRender(context)) {
             return;
         }
@@ -116,14 +181,27 @@ public abstract class EdssAwareComponent extends AbstractEdmlComponent
     protected abstract void renderContent(MinecraftRenderContext context, int x, int y, int width, int height);
 
     public void setCalculatedBounds(int x, int y, int width, int height) {
+        boolean changed = this.calculatedX != x || this.calculatedY != y ||
+                boxModel.width() != width || boxModel.height() != height;
+
         this.calculatedX = x;
         this.calculatedY = y;
 
         if (boxModel.width() != width || boxModel.height() != height) {
             this.boxModel = new BoxModel(width, height, boxModel.padding(), boxModel.margin());
+            markNeedsLayout();
         }
 
         updateVirtualBounds();
+
+        if (changed) {
+            onBoundsChanged();
+        }
+    }
+
+    @AwaitOverride
+    protected void onBoundsChanged() {
+        // Hook for subclasses
     }
 
     private void updateVirtualBounds() {
@@ -137,6 +215,7 @@ public abstract class EdssAwareComponent extends AbstractEdmlComponent
 
     @Override
     public void processAttributes(List<EdssRule> cssRules, IEdssRegistry cssRegistry, MinecraftRenderContext context) {
+        this.cachedContext = context;
         processSpecificAttributes(context);
 
         String styleAttr = getAttribute(TagAttribute.STYLE.getProperty(), "");
@@ -239,15 +318,15 @@ public abstract class EdssAwareComponent extends AbstractEdmlComponent
     @AwaitOverride
     protected void onViewportStatusChanged(boolean inViewport) {}
 
-    protected int getMinimumHeight(MinecraftRenderContext context) {
+    protected int getMinimumHeight() {
         if (EdmlEnum.BODY.getTagName().equals(getTagName())) {
-            return context.height();
+            return cachedContext != null ? cachedContext.height() : 0;
         }
         return 0;
     }
 
-
     protected void dispose() {
         VirtualizationManager.getInstance().unregisterComponent(this);
+        this.cachedContext = null;
     }
 }

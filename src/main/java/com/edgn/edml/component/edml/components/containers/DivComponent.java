@@ -3,16 +3,15 @@ package com.edgn.edml.component.edml.components.containers;
 import com.edgn.edml.component.TextCapableComponent;
 import com.edgn.edml.component.attribute.TagAttribute;
 import com.edgn.edml.component.edml.EdmlEnum;
-import com.edgn.edml.component.edml.components.EdssAwareComponent;
 import com.edgn.edml.minecraft.MinecraftRenderContext;
 import com.edgn.utils.ColorUtils;
 
 import java.util.Set;
 
-public final class DivComponent extends EdssAwareComponent implements TextCapableComponent {
+public final class DivComponent extends BaseContainer implements TextCapableComponent {
     private static final Set<String> DIV_ATTRIBUTES = Set.of(
             TagAttribute.CLASS.getProperty(), TagAttribute.ID.getProperty(),
-            TagAttribute.STYLE.getProperty(), TagAttribute.DATA.getProperty(),
+            TagAttribute.STYLE.getProperty(),
             TagAttribute.ROLE.getProperty(), TagAttribute.TITLE.getProperty(),
             TagAttribute.SUBTITLE.getProperty(), TagAttribute.DATA_TEXT.getProperty(),
             TagAttribute.DATA_TOOLTIP.getProperty(), TagAttribute.DATA_THEME.getProperty(),
@@ -22,9 +21,7 @@ public final class DivComponent extends EdssAwareComponent implements TextCapabl
     private String tooltip = "";
     private String role = "";
     private String theme = TagAttribute.THEME_DEFAULT.getProperty();
-
     private int textColor = ColorUtils.parseColor("black");
-
 
     public DivComponent() {
         super(EdmlEnum.DIV.getTagName(), DIV_ATTRIBUTES);
@@ -40,7 +37,6 @@ public final class DivComponent extends EdssAwareComponent implements TextCapabl
         applyThemeFromClasses();
     }
 
-    //TODO: banner
     private void applyRoleSpecificBehavior() {
         switch (role) {
             case "banner" -> {
@@ -132,12 +128,12 @@ public final class DivComponent extends EdssAwareComponent implements TextCapabl
         return textColor;
     }
 
-
     @Override
     public boolean hasTextContent() {
         String text = getAttribute(TagAttribute.DATA_TEXT.getProperty(), "");
         return !text.isEmpty();
     }
+
     @Override
     protected void onViewportStatusChanged(boolean inViewport) {
         if (hasClass(TagAttribute.ANIMATED.getProperty())) {

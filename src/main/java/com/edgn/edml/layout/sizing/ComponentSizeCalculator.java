@@ -1,5 +1,7 @@
 package com.edgn.edml.layout.sizing;
 
+import com.edgn.edml.component.TextCapableComponent;
+import com.edgn.edml.component.attribute.TagAttribute;
 import com.edgn.edml.component.edml.component.EdmlComponent;
 import com.edgn.edml.component.edml.EdmlEnum;
 import com.edgn.edml.component.edml.components.EdssAwareComponent;
@@ -9,6 +11,9 @@ import com.edgn.edml.layout.spacing.Padding;
 import com.edgn.edml.minecraft.MinecraftRenderContext;
 
 public class ComponentSizeCalculator implements IComponentSizeCalculator {
+
+    private static final int DEFAULT_LINE_HEIGHT = 20;
+    private static final int MIN_BLOCK_HEIGHT = 10;
 
     @Override
     public int calculateHeight(EdssAwareComponent component, MinecraftRenderContext context, int availableWidth) {
@@ -20,7 +25,22 @@ public class ComponentSizeCalculator implements IComponentSizeCalculator {
             return selfSizing.calculateOptimalHeight(context, availableWidth);
         }
 
-        return calculateAutoHeight(component, context, availableWidth);
+        if (hasTextContent(component)) {
+            Padding padding = component.getPadding();
+            return DEFAULT_LINE_HEIGHT + padding.vertical();
+        }
+
+        int childrenHeight = calculateChildrenTotalHeight(component, context, availableWidth);
+
+        if (childrenHeight > 0) {
+            return childrenHeight + component.getPadding().vertical();
+        }
+
+        if (component.getChildren().isEmpty()) {
+            return MIN_BLOCK_HEIGHT;
+        }
+
+        return component.getPadding().vertical();
     }
 
     @Override
@@ -34,18 +54,7 @@ public class ComponentSizeCalculator implements IComponentSizeCalculator {
             return Math.min(optimalWidth, context.width());
         }
 
-        if (EdmlEnum.BODY.getTagName().equals(component.getTagName())) {
-            return context.width();
-        }
-
         return context.width();
-    }
-
-    private int calculateAutoHeight(EdssAwareComponent component, MinecraftRenderContext context, int availableWidth) {
-        int childrenHeight = calculateChildrenTotalHeight(component, context, availableWidth);
-        Padding padding = component.getPadding();
-
-        return childrenHeight + padding.vertical();
     }
 
     private int calculateChildrenTotalHeight(EdssAwareComponent component, MinecraftRenderContext context, int availableWidth) {
@@ -59,7 +68,10 @@ public class ComponentSizeCalculator implements IComponentSizeCalculator {
 
                 totalHeight += childMargin.top();
 
-                int childHeight = calculateHeight(cssChild, context, childAvailableWidth);
+                int childHeight = cssChild.getHeight();
+                if (childHeight == 0) {
+                    childHeight = calculateHeight(cssChild, context, childAvailableWidth);
+                }
                 totalHeight += childHeight;
 
                 totalHeight += childMargin.bottom();
@@ -67,5 +79,20 @@ public class ComponentSizeCalculator implements IComponentSizeCalculator {
         }
 
         return totalHeight;
+    }
+
+    private boolean hasTextContent(EdssAwareComponent component) {
+        // Check data-text attribute
+        String dataText = component.getAttribute(TagAttribute.DATA_TEXT.getProperty(), "");
+        if (!dataText.isEmpty()) {
+            return true;
+        }
+
+        // Check if implements TextCapableComponent with content
+        if (component instanceof TextCapableComponent textCapable) {
+            return textCapable.hasTextContent();
+        }
+
+        return false;
     }
 }

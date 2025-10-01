@@ -2,24 +2,31 @@ package com.edgn.edml.component.edml.components.containers;
 
 import com.edgn.HTMLMyScreen;
 import com.edgn.edml.component.ClickableComponent;
+import com.edgn.edml.component.DraggableComponent;
 import com.edgn.edml.component.attribute.TagAttribute;
 import com.edgn.edml.component.edml.EdmlEnum;
 import com.edgn.edml.component.edml.component.EdmlComponent;
 import com.edgn.edml.component.edml.components.EdssAwareComponent;
 import com.edgn.edml.component.edml.components.scroll.ScrollManager;
 import com.edgn.edml.component.edml.components.scroll.ScrollableComponent;
+import com.edgn.edml.component.edml.components.ui.ScrollbarComponent;
+import com.edgn.edml.component.edml.components.ui.VirtualListComponent;
 import com.edgn.edml.minecraft.MinecraftRenderContext;
 import com.edgn.utils.ColorUtils;
 
 import java.util.Set;
 
-public final class BodyComponent extends EdssAwareComponent implements ClickableComponent, ScrollableComponent {
+public final class BodyComponent extends EdssAwareComponent implements ClickableComponent, ScrollableComponent, DraggableComponent {
 
     private static final Set<String> BODY_ATTRIBUTES = Set.of(
-            TagAttribute.CLASS.getProperty(), TagAttribute.ID.getProperty(),
-            TagAttribute.STYLE.getProperty(), TagAttribute.LOAD.getProperty(),
-            TagAttribute.UNLOAD.getProperty(), TagAttribute.DATA_LAYOUT.getProperty(),
-            TagAttribute.DATA_RESPONSIVE.getProperty(), TagAttribute.DATA_FULLSCREEN.getProperty()
+            TagAttribute.CLASS.getProperty(),
+            TagAttribute.ID.getProperty(),
+            TagAttribute.STYLE.getProperty(),
+            TagAttribute.LOAD.getProperty(),
+            TagAttribute.UNLOAD.getProperty(),
+            TagAttribute.DATA_LAYOUT.getProperty(),
+            TagAttribute.DATA_RESPONSIVE.getProperty(),
+            TagAttribute.DATA_FULLSCREEN.getProperty()
     );
 
     private String layout = "flow";
@@ -29,9 +36,21 @@ public final class BodyComponent extends EdssAwareComponent implements Clickable
     private int contentHeight = 0;
     private int viewportHeight = 0;
 
+    private ScrollbarComponent scrollbar;
+
     public BodyComponent() {
         super(EdmlEnum.BODY.getTagName(), BODY_ATTRIBUTES);
         ScrollManager.getInstance().setGlobalScrollComponent(this);
+        initializeScrollbar();
+    }
+
+    private void initializeScrollbar() {
+        scrollbar = new ScrollbarComponent();
+        scrollbar.applyAttribute(TagAttribute.DATA_ORIENTATION.getProperty(), "vertical");
+        scrollbar.applyAttribute(TagAttribute.DATA_SCROLLBAR_WIDTH.getProperty(), "10");
+        scrollbar.applyAttribute(TagAttribute.DATA_TRACK_COLOR.getProperty(), "#e0e0e0");
+        scrollbar.applyAttribute(TagAttribute.DATA_THUMB_COLOR.getProperty(), "#888888");
+        scrollbar.applyAttribute(TagAttribute.DATA_THUMB_HOVER_COLOR.getProperty(), "#555555");
     }
 
     @Override
@@ -55,7 +74,7 @@ public final class BodyComponent extends EdssAwareComponent implements Clickable
     }
 
     private void executeLoadEvent(String loadScript) {
-        // Logic pour exécuter les scripts onload
+        // Logic for onload scripts
     }
 
     private void applyBodyTheme() {
@@ -73,15 +92,25 @@ public final class BodyComponent extends EdssAwareComponent implements Clickable
     @Override
     protected void renderContent(MinecraftRenderContext context, int x, int y, int width, int height) {
         calculateContentHeight();
+    }
 
-        // Apply scroll offset
+    @Override
+    protected void renderChildren(MinecraftRenderContext context) {
+        // Apply scroll offset ONLY for children
         if (scrollOffset > 0) {
-            context.pushTransform(0, -scrollOffset, width, height + scrollOffset);
+            context.pushTransform(0, -scrollOffset, getCalculatedWidth(), getCalculatedHeight() + scrollOffset);
         }
 
-        // Render scrollbar if needed
+        // Render children with transform
+        children.forEach(child -> child.render(context));
+
+        if (scrollOffset > 0) {
+            context.popTransform();
+        }
+
+        // Render scrollbar AFTER transform (so it stays fixed)
         if (canScroll()) {
-            renderScrollbar(context, x, y, width, height);
+            renderScrollbar(context, getCalculatedX(), getCalculatedY(), getCalculatedWidth(), getCalculatedHeight());
         }
     }
 
@@ -96,29 +125,31 @@ public final class BodyComponent extends EdssAwareComponent implements Clickable
     }
 
     private void renderScrollbar(MinecraftRenderContext context, int x, int y, int width, int height) {
-        int scrollbarWidth = 8;
+        int scrollbarWidth = scrollbar.getScrollbarWidth();
         int scrollbarX = x + width - scrollbarWidth;
 
-        context.drawRect(scrollbarX, y, scrollbarWidth, height, ColorUtils.parseColor("#e0e0e0"));
+        scrollbar.setCalculatedBounds(scrollbarX, y, scrollbarWidth, height);
 
-        if (contentHeight > viewportHeight) {
-            int thumbHeight = Math.max(20, (viewportHeight * viewportHeight) / contentHeight);
-            int thumbY = y + (scrollOffset * (height - thumbHeight)) / getMaxScrollOffset();
+        int maxOffset = getMaxScrollOffset();
+        scrollbar.updateScrollState(scrollOffset, maxOffset, contentHeight, viewportHeight);
 
-            context.drawRect(scrollbarX + 1, thumbY, scrollbarWidth - 2, thumbHeight, ColorUtils.parseColor("#888888"));
-        }
+        scrollbar.render(context);
     }
 
-    // ScrollableComponent implementation
     @Override
     public boolean handleScroll(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (!canScroll()) return false;
+        if (!canScroll()) {
+            return false;
+        }
 
         int scrollDelta = (int) (-verticalAmount * 50);
         int newOffset = Math.max(0, Math.min(getMaxScrollOffset(), scrollOffset + scrollDelta));
 
         if (newOffset != scrollOffset) {
             scrollOffset = newOffset;
+            if (scrollbar != null) {
+                scrollbar.setScrollOffset(scrollOffset);
+            }
             HTMLMyScreen.LOGGER.debug("Body scrolled to offset: {}", scrollOffset);
             return true;
         }
@@ -140,6 +171,9 @@ public final class BodyComponent extends EdssAwareComponent implements Clickable
     @Override
     public void setScrollOffset(int offset) {
         this.scrollOffset = Math.max(0, Math.min(getMaxScrollOffset(), offset));
+        if (scrollbar != null) {
+            scrollbar.setScrollOffset(this.scrollOffset);
+        }
     }
 
     @Override
@@ -151,25 +185,88 @@ public final class BodyComponent extends EdssAwareComponent implements Clickable
     public boolean canScroll() {
         return contentHeight > viewportHeight;
     }
+
     @Override
     public boolean handleClick(double mouseX, double mouseY, int button) {
+        HTMLMyScreen.LOGGER.info("Body.handleClick: mouse=({}, {}), bounds=({}, {}, {}, {})",
+                mouseX, mouseY, getCalculatedX(), getCalculatedY(),
+                getCalculatedWidth(), getCalculatedHeight());
+
         if (!isPointInBounds(mouseX, mouseY)) {
+            HTMLMyScreen.LOGGER.info("Body: Click outside bounds");
             return false;
         }
 
-        for (EdmlComponent child : children) {
+        if (canScroll() && scrollbar != null) {
+            HTMLMyScreen.LOGGER.info("Body: Checking own scrollbar");
+            if (scrollbar.handleClick(mouseX, mouseY, button)) {
+                HTMLMyScreen.LOGGER.info("Body scrollbar clicked");
+                return true;
+            }
+        }
+
+        HTMLMyScreen.LOGGER.info("Body: Checking {} children", children.size());
+        for (int i = 0; i < children.size(); i++) {
+            EdmlComponent child = children.get(i);
+            HTMLMyScreen.LOGGER.info("Body: Checking child {} - {}", i, child.getClass().getSimpleName());
+
             if (child instanceof ClickableComponent clickable) {
-                if (clickable.handleClick(mouseX, mouseY, button)) {
+                boolean handled = clickable.handleClick(mouseX, mouseY, button);
+                HTMLMyScreen.LOGGER.info("Body: Child {} returned {}", i, handled);
+                if (handled) {
                     return true;
                 }
             }
         }
-        return true;
+
+        return false;
     }
 
-    public String getLayout() { return layout; }
-    public boolean isResponsive() { return responsive; }
-    public boolean isFullscreen() { return fullscreen; }
+    @Override
+    public boolean handleDrag(double mouseX, double mouseY) {
+        if (scrollbar != null && scrollbar.isDragging()) {
+            if (scrollbar.handleDrag(mouseX, mouseY)) {
+                scrollOffset = scrollbar.getScrollOffset();
+                return true;
+            }
+        }
+
+        for (EdmlComponent child : children) {
+            if (child instanceof DraggableComponent draggable) {
+                if (draggable.handleDrag(mouseX, mouseY)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    @Override
+    public void handleRelease() {
+        if (scrollbar != null) {
+            scrollbar.handleRelease();
+        }
+
+        for (EdmlComponent child : children) {
+            if (child instanceof DraggableComponent draggable) {
+                draggable.handleRelease();
+            }
+        }
+    }
+
+    public String getLayout() {
+        return layout;
+    }
+
+    public boolean isResponsive() {
+        return responsive;
+    }
+
+    public boolean isFullscreen() {
+        return fullscreen;
+    }
 
     public void onLoad() {
         String onLoadScript = getAttribute(TagAttribute.LOAD.getProperty(), "");
@@ -181,7 +278,7 @@ public final class BodyComponent extends EdssAwareComponent implements Clickable
     public void onUnload() {
         String onUnloadScript = getAttribute(TagAttribute.UNLOAD.getProperty(), "");
         if (!onUnloadScript.isEmpty()) {
-            // Logic pour onUnload
+            // Logic for onUnload
         }
     }
 

@@ -3,13 +3,12 @@ package com.edgn.edml.component.edml.components.containers;
 import com.edgn.edml.annotations.KeepEmpty;
 import com.edgn.edml.component.attribute.TagAttribute;
 import com.edgn.edml.component.edml.EdmlEnum;
-import com.edgn.edml.component.edml.components.EdssAwareComponent;
 import com.edgn.edml.minecraft.MinecraftRenderContext;
 import com.edgn.utils.ColorUtils;
 
 import java.util.Set;
 
-public final class FooterComponent extends EdssAwareComponent {
+public final class FooterComponent extends BaseContainer {
 
     private static final Set<String> FOOTER_ATTRIBUTES = Set.of(
             TagAttribute.CLASS.getProperty(), TagAttribute.ID.getProperty(),
@@ -48,7 +47,5 @@ public final class FooterComponent extends EdssAwareComponent {
 
     @Override
     @KeepEmpty
-    protected void renderContent(MinecraftRenderContext context, int x, int y, int width, int height) {
-        // Le contenu est rendu par les enfants
-    }
+    protected void renderContent(MinecraftRenderContext context, int x, int y, int width, int height) {}
 }

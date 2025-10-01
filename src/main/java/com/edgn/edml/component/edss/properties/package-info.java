@@ -1,1 +1,0 @@
-package com.edgn.edml.component.edss.properties;

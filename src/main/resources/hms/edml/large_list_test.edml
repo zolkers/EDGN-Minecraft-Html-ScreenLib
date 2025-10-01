@@ -1,0 +1,17 @@
+<body>
+    <header>
+        <div data-text="Large List Test"></div>
+        <div data-text="Total items: {{itemCount}}"></div>
+    </header>
+
+    <main>
+        <virtual-list
+            id="test-list"
+            data-for="item in testItems"
+            data-item-height="100">
+        </virtual-list>
+        <div>Coucou</div>
+        <div>Coucou 2</div>
+
+    </main>
+</body>

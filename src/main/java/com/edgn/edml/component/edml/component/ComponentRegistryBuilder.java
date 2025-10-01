@@ -4,6 +4,8 @@ import com.edgn.edml.component.edml.EdmlEnum;
 import com.edgn.edml.component.edml.components.containers.*;
 import com.edgn.edml.component.edml.components.elements.ImageComponent;
 import com.edgn.edml.component.edml.components.elements.TextComponent;
+import com.edgn.edml.component.edml.components.ui.ScrollbarComponent;
+import com.edgn.edml.component.edml.components.ui.VirtualListComponent;
 
 public final class ComponentRegistryBuilder {
 
@@ -32,10 +34,21 @@ public final class ComponentRegistryBuilder {
                 HeaderComponent::new,
                 MainComponent::new,
                 FooterComponent::new,
-                ImageComponent::new,
-                TextComponent::new,
                 SectionComponent::new
+        );
+    }
 
+    public ComponentRegistryBuilder registerStandardElements() {
+        return registerComponents(
+                ImageComponent::new,
+                TextComponent::new
+        );
+    }
+
+    public ComponentRegistryBuilder registerUIComponents() {
+        return registerComponents(
+                ScrollbarComponent::new,
+                VirtualListComponent::new
         );
     }
 
@@ -47,6 +60,7 @@ public final class ComponentRegistryBuilder {
         registry.registerComponent(tagName, factory);
         return this;
     }
+
     public ComponentRegistryBuilder registerCustomComponent(EdmlEnum tag, ComponentFactory factory) {
         registry.registerComponent(tag.getTagName(), factory);
         return this;
@@ -59,12 +73,15 @@ public final class ComponentRegistryBuilder {
     public static ComponentRegistry createMinimal() {
         return new ComponentRegistryBuilder()
                 .registerStandardContainers()
+                .registerStandardElements()
                 .build();
     }
 
     public static ComponentRegistry createDefault() {
         return new ComponentRegistryBuilder()
                 .registerStandardContainers()
+                .registerStandardElements()
+                .registerUIComponents()
                 .registerTextComponents()
                 .build();
     }
@@ -72,6 +89,8 @@ public final class ComponentRegistryBuilder {
     public static ComponentRegistry createFull() {
         return new ComponentRegistryBuilder()
                 .registerStandardContainers()
+                .registerStandardElements()
+                .registerUIComponents()
                 .registerTextComponents()
                 .build();
     }

@@ -1,0 +1,41 @@
+body {
+    width: 100vw;
+    height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0px;
+    padding: 0px;
+}
+
+header {
+    width: 100%;
+    height: 60px;
+    background-color: #2c3e50;
+    padding: 10px 20px;
+}
+
+header div {
+    height: 20px;
+    color: white;
+    margin: 5px 0px;
+    padding: 5px 10px;
+}
+
+main {
+    width: 100%;
+    padding: 20px;
+    background-color: #ffffff;
+}
+
+main > div {
+    height: 30px;
+    margin: 10px 0px;
+    padding: 10px;
+    background-color: #e0e0e0;
+}
+
+#test-list {
+    width: 100%;
+    height: 400px;
+    background-color: white;
+    margin: 10px 0px;
+}

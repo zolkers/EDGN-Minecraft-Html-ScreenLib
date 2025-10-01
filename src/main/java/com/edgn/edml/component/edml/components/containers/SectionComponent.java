@@ -2,18 +2,17 @@ package com.edgn.edml.component.edml.components.containers;
 
 import com.edgn.edml.annotations.KeepEmpty;
 import com.edgn.edml.component.attribute.TagAttribute;
-import com.edgn.edml.component.edml.components.EdssAwareComponent;
 import com.edgn.edml.minecraft.MinecraftRenderContext;
 import com.edgn.utils.ColorUtils;
 
 import java.util.Set;
 
-public final class SectionComponent extends EdssAwareComponent {
+public final class SectionComponent extends BaseContainer {
 
     private static final Set<String> SECTION_ATTRIBUTES = Set.of(
-            TagAttribute.CLASS.getProperty(), 
+            TagAttribute.CLASS.getProperty(),
             TagAttribute.ID.getProperty(),
-            TagAttribute.STYLE.getProperty(), 
+            TagAttribute.STYLE.getProperty(),
             TagAttribute.ROLE.getProperty(),
             TagAttribute.DATA_TEXT.getProperty(),
             TagAttribute.DATA_TOOLTIP.getProperty(),
@@ -167,25 +166,12 @@ public final class SectionComponent extends EdssAwareComponent {
         }
     }
 
-    private void startSectionAnimations() {
-        // Section-specific animation logic
-    }
+    private void startSectionAnimations() {}
+    private void pauseSectionAnimations() {}
 
-    private void pauseSectionAnimations() {
-        // Section-specific pause logic
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public String getTooltip() {
-        return tooltip;
-    }
-
-    public String getTheme() {
-        return theme;
-    }
+    public String getRole() { return role; }
+    public String getTooltip() { return tooltip; }
+    public String getTheme() { return theme; }
 
     public boolean isLandmarkSection() {
         return switch (role) {

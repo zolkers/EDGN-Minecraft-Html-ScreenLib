@@ -1,5 +1,6 @@
 package com.edgn.edml.layout.engine;
 
+import com.edgn.HTMLMyScreen;
 import com.edgn.edml.component.edml.component.EdmlComponent;
 import com.edgn.edml.component.edml.EdmlEnum;
 import com.edgn.edml.component.edml.components.EdssAwareComponent;
@@ -21,7 +22,6 @@ public record LayoutEngine(IComponentSizeCalculator sizeCalculator) implements I
     public void layoutComponent(EdmlComponent rootComponent, MinecraftRenderContext context) {
         if (rootComponent instanceof EdssAwareComponent cssRoot) {
             calculateIntrinsicSizes(cssRoot, context);
-
             performLayout(cssRoot, 0, 0, context);
         }
     }
@@ -39,7 +39,8 @@ public record LayoutEngine(IComponentSizeCalculator sizeCalculator) implements I
         }
 
         if (component.getHeight() == 0) {
-            int calculatedHeight = sizeCalculator.calculateHeight(component, context, component.getWidth());
+            int availableWidth = component.getWidth() - component.getPadding().horizontal();
+            int calculatedHeight = sizeCalculator.calculateHeight(component, context, availableWidth);
             component.setHeight(calculatedHeight);
         }
     }
@@ -60,7 +61,6 @@ public record LayoutEngine(IComponentSizeCalculator sizeCalculator) implements I
         if (children.isEmpty()) return;
 
         Padding parentPadding = parent.getPadding();
-
         int contentX = parent.getCalculatedX() + parentPadding.left();
         int contentY = parent.getCalculatedY() + parentPadding.top();
         int contentWidth = parent.getBoxModel().contentWidth();
@@ -74,7 +74,9 @@ public record LayoutEngine(IComponentSizeCalculator sizeCalculator) implements I
                 currentY += childMargin.top();
 
                 int childX = contentX + childMargin.left();
-                int childWidth = Math.min(cssChild.getWidth(), contentWidth - childMargin.horizontal());
+
+                int availableWidth = contentWidth - childMargin.horizontal();
+                int childWidth = Math.min(cssChild.getWidth(), availableWidth);
 
                 if (childWidth != cssChild.getWidth()) {
                     cssChild.setWidth(childWidth);
@@ -82,7 +84,14 @@ public record LayoutEngine(IComponentSizeCalculator sizeCalculator) implements I
 
                 performLayout(cssChild, childX, currentY, context);
 
-                currentY += cssChild.getHeight() + childMargin.bottom();
+                int childActualHeight = cssChild.getCalculatedHeight();
+                currentY += childActualHeight;
+
+                currentY += childMargin.bottom();
+
+                HTMLMyScreen.LOGGER.trace("Laid out {} at Y={}, height={}, next Y={}",
+                        cssChild.getTagName(), currentY - childActualHeight - childMargin.bottom(),
+                        childActualHeight, currentY);
             }
         }
     }
