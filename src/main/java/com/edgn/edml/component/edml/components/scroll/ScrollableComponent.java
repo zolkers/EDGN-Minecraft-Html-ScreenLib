@@ -1,4 +1,4 @@
-package com.edgn.edml.component.edml.scroll;
+package com.edgn.edml.component.edml.components.scroll;
 
 public interface ScrollableComponent {
     boolean handleScroll(double mouseX, double mouseY, double horizontalAmount, double verticalAmount);

@@ -1,6 +1,6 @@
 package com.edgn.edml.data.binding;
 
-import com.edgn.edml.data.BindingContext;
+import com.edgn.edml.data.IBindingContext;
 import com.edgn.edml.data.collections.ObservableList;
 
 import java.util.*;
@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-public class AdvancedBindingContext implements BindingContext {
+public class BindingContext implements IBindingContext {
     private final Map<String, Object> data = new ConcurrentHashMap<>();
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
     private final Map<String, ObservableList<?>> observableLists = new HashMap<>();

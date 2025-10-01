@@ -8,7 +8,7 @@ import com.edgn.edml.component.edss.property.EdssRule;
 import com.edgn.edml.component.edss.property.EdssRegistry;
 import com.edgn.edml.component.edml.component.AbstractEdmlComponent;
 import com.edgn.edml.component.edml.component.EdmlComponent;
-import com.edgn.edml.data.binding.AdvancedBindingContext;
+import com.edgn.edml.data.binding.BindingContext;
 import com.edgn.edml.data.binding.DataBindingEngine;
 import com.edgn.edml.exceptions.EdmlParsingException;
 import com.edgn.edml.exceptions.EdssParsingException;
@@ -35,13 +35,13 @@ public final class PathBasedEdmlScreen extends EdmlScreen {
     private final List<EdssRule> cssRules;
     private final IEdssRegistry cssRegistry;
     private final ILayoutEngine layoutEngine;
-    private final AdvancedBindingContext bindingContext;
+    private final BindingContext bindingContext;
     private final DataBindingEngine bindingEngine;
 
     public PathBasedEdmlScreen(Text title, String htmlPath, String cssPath) {
         super(title);
         this.cssRegistry = EdssRegistry.getInstance();
-        this.bindingContext = new AdvancedBindingContext();
+        this.bindingContext = new BindingContext();
         this.bindingEngine = new DataBindingEngine(bindingContext);
 
         IComponentSizeCalculator sizeCalculator = new ComponentSizeCalculator();
@@ -152,7 +152,7 @@ public final class PathBasedEdmlScreen extends EdmlScreen {
         super.close();
     }
 
-    public AdvancedBindingContext getBindingContext() {
+    public BindingContext getBindingContext() {
         return bindingContext;
     }
 

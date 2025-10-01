@@ -1,4 +1,4 @@
-package com.edgn.edml.component.edml.scroll;
+package com.edgn.edml.component.edml.components.scroll;
 
 import com.edgn.HTMLMyScreen;
 

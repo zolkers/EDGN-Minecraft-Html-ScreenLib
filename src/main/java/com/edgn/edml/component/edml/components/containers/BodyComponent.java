@@ -6,8 +6,8 @@ import com.edgn.edml.component.attribute.TagAttribute;
 import com.edgn.edml.component.edml.EdmlEnum;
 import com.edgn.edml.component.edml.component.EdmlComponent;
 import com.edgn.edml.component.edml.components.EdssAwareComponent;
-import com.edgn.edml.component.edml.scroll.ScrollManager;
-import com.edgn.edml.component.edml.scroll.ScrollableComponent;
+import com.edgn.edml.component.edml.components.scroll.ScrollManager;
+import com.edgn.edml.component.edml.components.scroll.ScrollableComponent;
 import com.edgn.edml.minecraft.MinecraftRenderContext;
 import com.edgn.utils.ColorUtils;
 

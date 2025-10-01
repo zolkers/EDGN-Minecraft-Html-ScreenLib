@@ -6,11 +6,10 @@ import com.edgn.edml.component.edml.component.AbstractEdmlComponent;
 import com.edgn.edml.component.edml.component.EdmlComponent;
 import com.edgn.edml.component.edml.components.EdssAwareComponent;
 import com.edgn.edml.component.edml.components.containers.DivComponent;
-import com.edgn.edml.component.edml.scroll.ScrollManager;
-import com.edgn.edml.component.edml.scroll.ScrollableComponent;
-import com.edgn.edml.data.BindingContext;
+import com.edgn.edml.component.edml.components.scroll.ScrollManager;
+import com.edgn.edml.component.edml.components.scroll.ScrollableComponent;
+import com.edgn.edml.data.IBindingContext;
 import com.edgn.edml.data.collections.ObservableList;
-import com.edgn.utils.HtmlUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,12 +18,11 @@ import java.util.regex.Pattern;
 
 public class DataBindingEngine {
     private static final Pattern BINDING_PATTERN = Pattern.compile("\\{\\{([^}]+)\\}\\}");
-
-    private final BindingContext bindingContext;
+    private final IBindingContext bindingContext;
     private final Map<String, Set<BoundComponent>> boundComponents = new ConcurrentHashMap<>();
     private final Map<String, VirtualListBinding> virtualListBindings = new ConcurrentHashMap<>();
 
-    public DataBindingEngine(BindingContext bindingContext) {
+    public DataBindingEngine(IBindingContext bindingContext) {
         this.bindingContext = bindingContext;
     }
 
