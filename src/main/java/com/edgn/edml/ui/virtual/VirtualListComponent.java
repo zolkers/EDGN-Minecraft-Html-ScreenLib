@@ -8,6 +8,9 @@ import com.edgn.edml.dom.components.EdssAwareComponent;
 import com.edgn.edml.ui.scroll.ScrollableComponent;
 import com.edgn.edml.ui.scroll.ScrollManager;
 import com.edgn.edml.ui.scroll.ScrollbarComponent;
+import com.edgn.edml.ui.clipping.ClippingRegion;
+import com.edgn.edml.ui.clipping.ClippedRectangle;
+import com.edgn.edml.ui.clipping.RectangleClipper;
 import com.edgn.edml.data.collections.ObservableList;
 import com.edgn.edml.core.rendering.MinecraftRenderContext;
 import com.edgn.edml.utils.ColorUtils;
@@ -33,6 +36,8 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
     private String itemTemplate = "";
     private int itemHeight = 40;
     private int scrollOffset = 0;
+    private int contentHeight = 0;
+    private int viewportHeight = 0;
 
     private int visibleStartIndex = 0;
     private int visibleEndIndex = 0;
@@ -56,7 +61,6 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
 
             @Override
             public void onItemChanged(int index, Object oldItem, Object newItem) {
-                // No layout needed for content change
             }
 
             @Override
@@ -102,6 +106,7 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
         }
 
         initializeScrollbar();
+        this.viewportHeight = context.height();
     }
 
     private void parseDataForAttribute(String dataFor) {
@@ -119,6 +124,9 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
         scrollbar = new ScrollbarComponent();
         scrollbar.applyAttribute(TagAttribute.DATA_ORIENTATION.getProperty(), "vertical");
         scrollbar.applyAttribute(TagAttribute.DATA_SCROLLBAR_WIDTH.getProperty(), "8");
+        scrollbar.applyAttribute(TagAttribute.DATA_TRACK_COLOR.getProperty(), "#e0e0e0");
+        scrollbar.applyAttribute(TagAttribute.DATA_THUMB_COLOR.getProperty(), "#888888");
+        scrollbar.applyAttribute(TagAttribute.DATA_THUMB_HOVER_COLOR.getProperty(), "#555555");
     }
 
     public void bindToList(ObservableList<?> list) {
@@ -147,19 +155,30 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
             return;
         }
 
-        context.pushTransform(0, 0, width, height);
+        this.viewportHeight = height;
+        calculateContentHeight();
         updateVisibleRange();
-        renderVisibleItems(context, x, y, width, height);
-        context.popTransform();
+
+        // Créer la région de clipping
+        ClippingRegion clipRegion = new ClippingRegion(x, y, width, height);
+
+        // Rendre avec clipping
+        renderVisibleItemsWithClipping(context, clipRegion, x, y, width, height);
     }
 
     @Override
     protected void renderChildren(MinecraftRenderContext context) {
-        // Render scrollbar outside any parent transforms
         if (canScroll() && scrollbar != null) {
-            renderScrollbar(context, getCalculatedX(), getCalculatedY(),
-                    getCalculatedWidth(), getCalculatedHeight());
+            renderScrollbar(context);
         }
+    }
+
+    private void calculateContentHeight() {
+        if (dataList == null) {
+            contentHeight = 0;
+            return;
+        }
+        contentHeight = dataList.size() * itemHeight;
     }
 
     private void renderEmptyState(MinecraftRenderContext context, int x, int y, int width, int height) {
@@ -176,43 +195,60 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
             return;
         }
 
-        int viewportHeight = getCalculatedHeight();
-        int itemsPerPage = Math.max(1, (viewportHeight / itemHeight) + 2);
+        visibleStartIndex = Math.max(0, (scrollOffset / itemHeight) - 1);
 
-        visibleStartIndex = Math.max(0, scrollOffset / itemHeight);
-        visibleEndIndex = Math.min(dataList.size() - 1, visibleStartIndex + itemsPerPage);
+        int itemsInViewport = (viewportHeight / itemHeight) + 3;
+        visibleEndIndex = Math.min(dataList.size() - 1, visibleStartIndex + itemsInViewport);
     }
 
-    private void renderVisibleItems(MinecraftRenderContext context, int x, int y, int width, int height) {
+    private void renderVisibleItemsWithClipping(MinecraftRenderContext context, ClippingRegion clipRegion,
+                                                int x, int y, int width, int height) {
         int scrollbarWidth = scrollbar != null ? scrollbar.getScrollbarWidth() : 0;
         int contentWidth = width - scrollbarWidth;
 
-        int currentY = y - (scrollOffset % itemHeight);
-
         for (int i = visibleStartIndex; i <= visibleEndIndex && i < dataList.size(); i++) {
-            if (currentY + itemHeight < y || currentY >= y + height) {
-                currentY += itemHeight;
+            int itemAbsoluteY = i * itemHeight;
+            int itemRenderY = y + itemAbsoluteY - scrollOffset;
+
+            // Clipper l'item verticalement
+            ClippedRectangle clippedItem = RectangleClipper.clipVertical(
+                    clipRegion,
+                    x,
+                    itemRenderY,
+                    contentWidth,
+                    itemHeight
+            );
+
+            if (clippedItem.isCompletelyHidden()) {
                 continue;
             }
 
             Object itemData = dataList.get(i);
-            renderItem(context, itemData, i, x, currentY, contentWidth);
-            currentY += itemHeight;
+            renderItemClipped(context, itemData, i, clippedItem, itemRenderY);
         }
     }
 
-    private void renderItem(MinecraftRenderContext context, Object itemData, int index, int x, int y, int width) {
+    private void renderItemClipped(MinecraftRenderContext context, Object itemData, int index,
+                                   ClippedRectangle clipped, int originalY) {
+        // Couleur alternée
         int itemColor = (index % 2 == 0) ?
                 ColorUtils.parseColor("#ffffff") :
                 ColorUtils.parseColor("#f9f9f9");
 
-        context.drawRect(x, y, width, itemHeight, itemColor);
+        // Rendre le background clippé
+        context.drawRect(clipped.getX(), clipped.getY(), clipped.getWidth(), clipped.getHeight(), itemColor);
 
+        // Calculer la position du texte
         String processedContent = processTemplate(itemData, index);
 
-        int textX = x + 10;
-        int textY = y + (itemHeight - 10) / 2;
-        context.drawText(processedContent, textX, textY, ColorUtils.parseColor("#333333"));
+        int textX = clipped.getX() + 10;
+        int textBaseY = originalY + (itemHeight - 10) / 2;
+
+        // Vérifier si le texte est dans la zone visible
+        int textHeight = 10;
+        if (textBaseY >= clipped.getY() && textBaseY + textHeight <= clipped.getY() + clipped.getHeight()) {
+            context.drawText(processedContent, textX, textBaseY, ColorUtils.parseColor("#333333"));
+        }
     }
 
     private String processTemplate(Object itemData, int index) {
@@ -224,20 +260,18 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
         return result;
     }
 
-    private void renderScrollbar(MinecraftRenderContext context, int x, int y, int width, int viewportHeight) {
-        if (scrollbar == null || !canScroll()) {
-            return;
-        }
-
+    private void renderScrollbar(MinecraftRenderContext context) {
         int scrollbarWidth = scrollbar.getScrollbarWidth();
-        int scrollbarX = x + width - scrollbarWidth;
+        int x = getCalculatedX() + getCalculatedWidth() - scrollbarWidth;
+        int y = getCalculatedY();
+        int width = scrollbarWidth;
+        int height = getCalculatedHeight();
 
-        scrollbar.setCalculatedBounds(scrollbarX, y, scrollbarWidth, viewportHeight);
+        scrollbar.setCalculatedBounds(x, y, width, height);
 
-        int contentHeight = dataList.size() * itemHeight;
-        int maxOffset = Math.max(0, contentHeight - viewportHeight);
-
+        int maxOffset = getMaxScrollOffset();
         scrollbar.updateScrollState(scrollOffset, maxOffset, contentHeight, viewportHeight);
+
         scrollbar.render(context);
     }
 
@@ -255,7 +289,6 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
             if (scrollbar != null) {
                 scrollbar.setScrollOffset(scrollOffset);
             }
-            HTMLMyScreen.LOGGER.debug("VirtualList scrolled to offset: {}", scrollOffset);
             return true;
         }
 
@@ -264,18 +297,14 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
 
     @Override
     public boolean handleClick(double mouseX, double mouseY, int button) {
-        HTMLMyScreen.LOGGER.debug("VirtualList.handleClick: mouse=({}, {})", mouseX, mouseY);
-
         if (!isPointInBounds(mouseX, mouseY)) {
-            HTMLMyScreen.LOGGER.debug("VirtualList: Click outside bounds");
             return false;
         }
 
         if (canScroll() && scrollbar != null) {
-            HTMLMyScreen.LOGGER.debug("VirtualList: Checking scrollbar click");
-            boolean handled = scrollbar.handleClick(mouseX, mouseY, button);
-            HTMLMyScreen.LOGGER.debug("VirtualList: scrollbar handled={}", handled);
-            return handled;
+            if (scrollbar.handleClick(mouseX, mouseY, button)) {
+                return true;
+            }
         }
 
         return false;
@@ -283,6 +312,13 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
 
     @Override
     public boolean handleDrag(double mouseX, double mouseY) {
+        if (scrollbar != null && scrollbar.isDragging()) {
+            boolean handled = scrollbar.handleDrag(mouseX, mouseY);
+            if (handled) {
+                scrollOffset = scrollbar.getScrollOffset();
+            }
+            return handled;
+        }
         return false;
     }
 
@@ -290,7 +326,6 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
     public void handleRelease() {
         if (scrollbar != null) {
             scrollbar.handleRelease();
-            HTMLMyScreen.LOGGER.debug("VirtualList: scrollbar released");
         }
     }
 
@@ -318,8 +353,6 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
         if (dataList == null || dataList.isEmpty()) {
             return 0;
         }
-        int contentHeight = dataList.size() * itemHeight;
-        int viewportHeight = getCalculatedHeight();
         return Math.max(0, contentHeight - viewportHeight);
     }
 
@@ -328,7 +361,7 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
         if (dataList == null || dataList.isEmpty()) {
             return false;
         }
-        return dataList.size() * itemHeight > getCalculatedHeight();
+        return contentHeight > viewportHeight;
     }
 
     @Override

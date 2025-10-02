@@ -83,27 +83,23 @@ public final class ScrollbarComponent extends EdssAwareComponent implements Clic
 
     @Override
     protected void renderContent(MinecraftRenderContext context, int x, int y, int width, int height) {
-        // CRITICAL: Don't check shouldRender() here, always render if parent wants us visible
         if (maxScrollOffset <= 0) {
-            return; // Nothing to scroll
+            return;
         }
 
         if (orientation == Orientation.VERTICAL) {
-            renderVerticalScrollbar(context, x, y, width, height);
+            renderVerticalScrollbar(context, x, y, height);
         } else {
-            renderHorizontalScrollbar(context, x, y, width, height);
+            renderHorizontalScrollbar(context, x, y, width);
         }
     }
 
-    private void renderVerticalScrollbar(MinecraftRenderContext context, int x, int y, int width, int height) {
-        // Draw track background
+    private void renderVerticalScrollbar(MinecraftRenderContext context, int x, int y, int height) {
         context.drawRect(x, y, scrollbarWidth, height, trackColor);
 
-        // Calculate thumb dimensions
         int thumbHeight = calculateThumbSize(height);
         int thumbY = calculateThumbPosition(y, height, thumbHeight);
 
-        // Draw thumb with hover effect
         int currentThumbColor = (isHovered || isDragging) ? thumbHoverColor : thumbColor;
         int thumbX = x + 1;
         int thumbWidth = scrollbarWidth - 2;
@@ -111,15 +107,12 @@ public final class ScrollbarComponent extends EdssAwareComponent implements Clic
         context.drawRect(thumbX, thumbY, thumbWidth, thumbHeight, currentThumbColor);
     }
 
-    private void renderHorizontalScrollbar(MinecraftRenderContext context, int x, int y, int width, int height) {
-        // Draw track background
+    private void renderHorizontalScrollbar(MinecraftRenderContext context, int x, int y, int width) {
         context.drawRect(x, y, width, scrollbarWidth, trackColor);
 
-        // Calculate thumb dimensions
         int thumbWidth = calculateThumbSize(width);
         int thumbX = calculateThumbPosition(x, width, thumbWidth);
 
-        // Draw thumb with hover effect
         int currentThumbColor = (isHovered || isDragging) ? thumbHoverColor : thumbColor;
         int thumbY = y + 1;
         int thumbHeight = scrollbarWidth - 2;
@@ -132,7 +125,6 @@ public final class ScrollbarComponent extends EdssAwareComponent implements Clic
             return minThumbSize;
         }
 
-        // Thumb size proportional to viewport/content ratio
         int size = (viewportSize * trackSize) / contentSize;
         return Math.max(minThumbSize, Math.min(size, trackSize));
     }
@@ -147,13 +139,10 @@ public final class ScrollbarComponent extends EdssAwareComponent implements Clic
             return trackStart;
         }
 
-        int position = (scrollOffset * availableSpace) / maxScrollOffset;
+        int position = (int) ((long) scrollOffset * availableSpace / maxScrollOffset);
         return trackStart + Math.max(0, Math.min(position, availableSpace));
     }
 
-    /**
-     * Updates the scrollbar state - must be called before rendering
-     */
     public void updateScrollState(int offset, int maxOffset, int content, int viewport) {
         this.scrollOffset = Math.max(0, Math.min(maxOffset, offset));
         this.maxScrollOffset = Math.max(0, maxOffset);
@@ -182,19 +171,19 @@ public final class ScrollbarComponent extends EdssAwareComponent implements Clic
 
     @Override
     public boolean handleClick(double mouseX, double mouseY, int button) {
-        HTMLMyScreen.LOGGER.debug("Scrollbar.handleClick: mouse=({}, {}), bounds=({}, {}, {}, {}), scrollbarWidth={}",
-                mouseX, mouseY, getCalculatedX(), getCalculatedY(),
-                getCalculatedWidth(), getCalculatedHeight(), scrollbarWidth);
+        HTMLMyScreen.LOGGER.info("=== SCROLLBAR CLICK === mouse=({},{}), inBounds={}, button={}",
+                mouseX, mouseY, isPointInScrollbar(mouseX, mouseY), button);
 
         if (!isPointInScrollbar(mouseX, mouseY) || button != 0) {
-            HTMLMyScreen.LOGGER.debug("Not in scrollbar or wrong button");
             return false;
         }
 
         isDragging = true;
         dragStartPos = orientation == Orientation.VERTICAL ? mouseY : mouseX;
         dragStartOffset = scrollOffset;
-        HTMLMyScreen.LOGGER.debug("Started dragging at pos={}", dragStartPos);
+
+        HTMLMyScreen.LOGGER.info("SCROLLBAR: Drag started - dragStartPos={}, dragStartOffset={}, maxScrollOffset={}",
+                dragStartPos, dragStartOffset, maxScrollOffset);
         return true;
     }
 
@@ -204,17 +193,17 @@ public final class ScrollbarComponent extends EdssAwareComponent implements Clic
         }
 
         double currentPos = orientation == Orientation.VERTICAL ? mouseY : mouseX;
-        double delta = currentPos - dragStartPos;
+        double pixelDelta = currentPos - dragStartPos;
 
         int trackSize = orientation == Orientation.VERTICAL ? getCalculatedHeight() : getCalculatedWidth();
         int thumbSize = calculateThumbSize(trackSize);
         int availableSpace = trackSize - thumbSize;
 
         if (availableSpace > 0 && maxScrollOffset > 0) {
-            double ratio = delta / availableSpace;
-            int offsetDelta = (int) (ratio * maxScrollOffset);
+            long scrollDelta = (long) pixelDelta * maxScrollOffset / availableSpace;
+            long newOffset = dragStartOffset + scrollDelta;
 
-            scrollOffset = Math.max(0, Math.min(maxScrollOffset, dragStartOffset + offsetDelta));
+            scrollOffset = (int) Math.max(0, Math.min(maxScrollOffset, newOffset));
 
             return true;
         }

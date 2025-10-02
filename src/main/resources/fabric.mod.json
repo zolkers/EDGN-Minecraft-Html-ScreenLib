@@ -3,7 +3,7 @@
 	"id": "html-my-screen",
 	"version": "${version}",
 	"name": "HTML My screen",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Minecraft UI Framework for devs",
 	"authors": [
 		"EDGN!"
 	],

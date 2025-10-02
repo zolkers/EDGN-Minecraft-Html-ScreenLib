@@ -8,7 +8,7 @@
         <virtual-list
             id="test-list"
             data-for="item in testItems"
-            data-item-height="100">
+            data-item-height="10">
         </virtual-list>
         <div>Coucou</div>
         <div>Coucou 2</div>
