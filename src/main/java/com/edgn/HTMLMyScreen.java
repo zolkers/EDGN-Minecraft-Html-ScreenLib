@@ -18,9 +18,7 @@ import org.slf4j.LoggerFactory;
 public final class HTMLMyScreen implements ModInitializer {
 	public static final String MOD_ID = "html-my-screen";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-
     private static KeyBinding openTestScreenKey;
-
     @Override
     public void onInitialize() {
         if(!FabricLoader.getInstance().isDevelopmentEnvironment()) return;

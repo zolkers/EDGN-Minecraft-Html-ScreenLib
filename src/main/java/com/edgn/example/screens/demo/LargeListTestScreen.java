@@ -17,12 +17,10 @@ public class LargeListTestScreen extends StandardResourceEdmlScreen {
         
         ObservableList<String> items = context.createObservableList("testItems");
         
-        System.out.println("Generating 500,000 test items...");
         for (int i = 1; i <= 500_000; i++) {
             items.add("Item #" + i);
         }
-        System.out.println("Items generated!");
-        
+
         context.setValue("itemCount", String.valueOf(items.size()));
     }
 }

@@ -37,6 +37,7 @@ public final class DivComponent extends BaseContainer implements TextCapableComp
         applyThemeFromClasses();
     }
 
+    //TODO: one day maybe
     private void applyRoleSpecificBehavior() {
         switch (role) {
             case "banner" -> {

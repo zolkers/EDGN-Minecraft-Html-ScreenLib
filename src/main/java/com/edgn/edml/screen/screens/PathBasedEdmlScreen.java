@@ -1,8 +1,6 @@
 package com.edgn.edml.screen.screens;
 
 import com.edgn.HTMLMyScreen;
-import com.edgn.edml.core.events.ClickableComponent;
-import com.edgn.edml.core.events.DraggableComponent;
 import com.edgn.edml.core.events.resize.ResizableComponent;
 import com.edgn.edml.dom.components.attributes.AttributeProcessor;
 import com.edgn.edml.dom.components.attributes.TagAttribute;
@@ -24,7 +22,6 @@ import com.edgn.edml.layout.sizing.ComponentSizeCalculator;
 import com.edgn.edml.layout.LayoutEngine;
 import com.edgn.edml.layout.ILayoutEngine;
 import com.edgn.edml.core.rendering.MinecraftRenderContext;
-import com.edgn.edml.core.rendering.context.RenderContext;
 import com.edgn.edml.screen.EdmlScreen;
 import com.edgn.edml.parser.document.DefaultEdmlParser;
 import com.edgn.edml.parser.style.EdssParser;
@@ -32,7 +29,6 @@ import com.edgn.edml.parser.document.EdmlParser;
 import com.edgn.edml.parser.style.SimpleEdssParser;
 import com.edgn.edml.resources.EdmlResourceLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 
 import java.util.List;
@@ -79,10 +75,6 @@ public final class PathBasedEdmlScreen extends EdmlScreen implements ResizeListe
 
     @Override
     public void onResize(ResizeEvent event) {
-        HTMLMyScreen.LOGGER.debug("Screen resize: {}x{} -> {}x{}",
-                event.oldWidth(), event.oldHeight(),
-                event.newWidth(), event.newHeight());
-
         performFullResize(event);
     }
 
@@ -177,61 +169,6 @@ public final class PathBasedEdmlScreen extends EdmlScreen implements ResizeListe
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-
-        if (rootComponent != null) {
-            RenderContext renderContext = new RenderContext(context, this.width, this.height);
-
-            if (rootComponent instanceof ResizableComponent resizable && resizable.needsLayout()) {
-                layoutEngine.layoutComponent(rootComponent, renderContext);
-                resizable.clearNeedsLayout();
-            }
-
-            rootComponent.render(renderContext);
-        }
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        HTMLMyScreen.LOGGER.info("=== SCREEN mouseClicked: ({}, {}) button={} ===", mouseX, mouseY, button);
-
-        if (rootComponent instanceof ClickableComponent clickable) {
-            boolean handled = clickable.handleClick(mouseX, mouseY, button);
-            HTMLMyScreen.LOGGER.info("Root component handled: {}", handled);
-            return handled;
-        }
-        return super.mouseClicked(mouseX, mouseY, button);
-    }
-
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (rootComponent instanceof DraggableComponent draggable) {
-            if (draggable.handleDrag(mouseX, mouseY)) {
-                return true;
-            }
-        }
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (rootComponent instanceof DraggableComponent draggable) {
-            draggable.handleRelease();
-        }
-        return super.mouseReleased(mouseX, mouseY, button);
-    }
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        boolean handled = ScrollManager.getInstance().handleScrollEvent(mouseX, mouseY, horizontalAmount, verticalAmount);
-        if (handled) {
-            return true;
-        }
-        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
-    }
-
-    @Override
     public void close() {
         ResizeManager.getInstance().removeListener(this);
         ScrollManager.getInstance().dispose();
@@ -247,8 +184,14 @@ public final class PathBasedEdmlScreen extends EdmlScreen implements ResizeListe
         return bindingEngine;
     }
 
-    public EdmlComponent getRootComponent() {
+    @Override
+    protected EdmlComponent getRootComponent() {
         return rootComponent;
+    }
+
+    @Override
+    protected ILayoutEngine getLayoutEngine() {
+        return layoutEngine;
     }
 
     private record WindowSizeContext(int width, int height) implements MinecraftRenderContext {}

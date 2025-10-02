@@ -17,7 +17,6 @@ public class ScrollManager {
     
     public void registerScrollable(ScrollableComponent component) {
         scrollableComponents.add(component);
-        HTMLMyScreen.LOGGER.debug("Registered scrollable component: {}", component.getClass().getSimpleName());
     }
     
     public void unregisterScrollable(ScrollableComponent component) {
@@ -26,7 +25,6 @@ public class ScrollManager {
     
     public void setGlobalScrollComponent(ScrollableComponent component) {
         this.globalScrollComponent = component;
-        HTMLMyScreen.LOGGER.debug("Set global scroll component: {}", component.getClass().getSimpleName());
     }
     
     public boolean handleScrollEvent(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
@@ -34,7 +32,6 @@ public class ScrollManager {
             if (component.isPointInBounds(mouseX, mouseY) && component.canScroll()) {
                 boolean handled = component.handleScroll(mouseX, mouseY, horizontalAmount, verticalAmount);
                 if (handled) {
-                    HTMLMyScreen.LOGGER.debug("Scroll handled by: {}", component.getClass().getSimpleName());
                     return true;
                 }
             }

@@ -53,7 +53,6 @@ public final class DataBindingEngine {
         String forAttribute = virtualList.getAttribute(TagAttribute.DATA_FOR.getProperty(), "");
 
         if (forAttribute.isEmpty()) {
-            HTMLMyScreen.LOGGER.warn("VirtualListComponent found without data-for attribute");
             return;
         }
 
@@ -72,7 +71,6 @@ public final class DataBindingEngine {
             String componentId = virtualList.getAttribute(TagAttribute.ID.getProperty(), UUID.randomUUID().toString());
             virtualListComponents.put(componentId, virtualList);
 
-            HTMLMyScreen.LOGGER.info("VirtualListComponent bound to list at '{}' with {} items", listPath, observableList.size());
         } else {
             HTMLMyScreen.LOGGER.error("No ObservableList found at path '{}' for VirtualListComponent", listPath);
         }
@@ -133,33 +131,22 @@ public final class DataBindingEngine {
 
         boundComponents.clear();
         virtualListComponents.clear();
-
-        HTMLMyScreen.LOGGER.debug("DataBindingEngine disposed");
     }
-    private static class BoundComponent {
-        final EdmlComponent component;
-        final String attributeName;
-        final String originalValue;
-        final Set<String> bindingPaths;
 
-        BoundComponent(EdmlComponent component, String attributeName, String originalValue, Set<String> bindingPaths) {
-            this.component = component;
-            this.attributeName = attributeName;
-            this.originalValue = originalValue;
-            this.bindingPaths = bindingPaths;
-        }
+    private record BoundComponent(EdmlComponent component, String attributeName, String originalValue,
+                                  Set<String> bindingPaths) {
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof BoundComponent that)) return false;
-            return Objects.equals(component, that.component) &&
-                    Objects.equals(attributeName, that.attributeName);
-        }
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (!(o instanceof BoundComponent that)) return false;
+                return Objects.equals(component, that.component) &&
+                        Objects.equals(attributeName, that.attributeName);
+            }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(component, attributeName);
+            @Override
+            public int hashCode() {
+                return Objects.hash(component, attributeName);
+            }
         }
-    }
 }

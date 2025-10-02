@@ -149,7 +149,6 @@ public final class BodyComponent extends EdssAwareComponent implements Clickable
             if (scrollbar != null) {
                 scrollbar.setScrollOffset(scrollOffset);
             }
-            HTMLMyScreen.LOGGER.debug("Body scrolled to offset: {}", scrollOffset);
             return true;
         }
 
@@ -187,31 +186,19 @@ public final class BodyComponent extends EdssAwareComponent implements Clickable
 
     @Override
     public boolean handleClick(double mouseX, double mouseY, int button) {
-        HTMLMyScreen.LOGGER.info("Body.handleClick: mouse=({}, {}), bounds=({}, {}, {}, {})",
-                mouseX, mouseY, getCalculatedX(), getCalculatedY(),
-                getCalculatedWidth(), getCalculatedHeight());
-
         if (!isPointInBounds(mouseX, mouseY)) {
-            HTMLMyScreen.LOGGER.info("Body: Click outside bounds");
             return false;
         }
 
         if (canScroll() && scrollbar != null) {
-            HTMLMyScreen.LOGGER.info("Body: Checking own scrollbar");
             if (scrollbar.handleClick(mouseX, mouseY, button)) {
-                HTMLMyScreen.LOGGER.info("Body scrollbar clicked");
                 return true;
             }
         }
 
-        HTMLMyScreen.LOGGER.info("Body: Checking {} children", children.size());
-        for (int i = 0; i < children.size(); i++) {
-            EdmlComponent child = children.get(i);
-            HTMLMyScreen.LOGGER.info("Body: Checking child {} - {}", i, child.getClass().getSimpleName());
-
+        for (EdmlComponent child : children) {
             if (child instanceof ClickableComponent clickable) {
                 boolean handled = clickable.handleClick(mouseX, mouseY, button);
-                HTMLMyScreen.LOGGER.info("Body: Child {} returned {}", i, handled);
                 if (handled) {
                     return true;
                 }

@@ -94,7 +94,6 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
         try {
             itemHeight = Integer.parseInt(itemHeightStr);
         } catch (NumberFormatException e) {
-            HTMLMyScreen.LOGGER.warn("Invalid item height: {}, using default: 40", itemHeightStr);
             itemHeight = 40;
         }
 
@@ -143,7 +142,6 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
             ObservableList<Object> observableList = (ObservableList<Object>) list;
             observableList.addListener(listChangeListener);
 
-            HTMLMyScreen.LOGGER.info("VirtualList bound to list with {} items", list.size());
             markNeedsLayout();
         }
     }

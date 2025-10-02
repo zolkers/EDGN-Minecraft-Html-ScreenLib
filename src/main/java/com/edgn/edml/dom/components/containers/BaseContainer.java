@@ -38,18 +38,9 @@ public abstract class BaseContainer extends EdssAwareComponent implements Clicka
 
     @Override
     public boolean handleDrag(double mouseX, double mouseY) {
-        HTMLMyScreen.LOGGER.info("{}.handleDrag: Checking {} children",
-                this.getClass().getSimpleName(), children.size());
-
-        for (int i = 0; i < children.size(); i++) {
-            EdmlComponent child = children.get(i);
-            HTMLMyScreen.LOGGER.info("{}: Child {}: {}",
-                    this.getClass().getSimpleName(), i, child.getClass().getSimpleName());
-
+        for (EdmlComponent child : children) {
             if (child instanceof DraggableComponent draggable) {
                 boolean handled = draggable.handleDrag(mouseX, mouseY);
-                HTMLMyScreen.LOGGER.info("{}: Child {} returned: {}",
-                        this.getClass().getSimpleName(), i, handled);
                 if (handled) {
                     return true;
                 }
