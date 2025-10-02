@@ -18,10 +18,18 @@ public final class DebugBoxRenderer {
         }
     }
 
-    private static void renderComponentTree(DrawContext context, EdssAwareComponent component,
-                                            ConsoleSettings settings, int depth, int scrollOffset) {
+    private static void renderComponentTree(
+            DrawContext context,
+            EdssAwareComponent component,
+            ConsoleSettings settings,
+            int depth,
+            int scrollOffset
+    ) {
         try {
-            renderComponentBox(context, component, settings, depth, scrollOffset);
+            String tag = component.getTagName();
+            if (!"body".equalsIgnoreCase(tag)) {
+                renderComponentBox(context, component, settings, depth, scrollOffset);
+            }
 
             for (EdmlComponent child : component.getChildren()) {
                 if (child instanceof EdssAwareComponent cssChild) {
@@ -29,8 +37,7 @@ public final class DebugBoxRenderer {
                 }
             }
         } catch (Exception e) {
-            HTMLMyScreen.LOGGER.error("Error rendering debug box for {}",
-                    component.getTagName(), e);
+            HTMLMyScreen.LOGGER.error("Error rendering debug box for {}", component.getTagName(), e);
         }
     }
 

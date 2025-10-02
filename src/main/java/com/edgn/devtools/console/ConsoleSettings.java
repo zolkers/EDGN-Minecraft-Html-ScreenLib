@@ -7,6 +7,8 @@ import com.edgn.edml.core.component.registry.EdmlComponentRegistry;
 
 import java.util.*;
 
+import static java.awt.Color.HSBtoRGB;
+
 public final class ConsoleSettings {
     private int consoleHeight = 300;
     private float opacity = 0.95f;
@@ -40,7 +42,7 @@ public final class ConsoleSettings {
         float saturation = 0.85f;
         float brightness = 0.95f;
 
-        int rgb = java.awt.Color.HSBtoRGB(hue, saturation, brightness);
+        int rgb = HSBtoRGB(hue, saturation, brightness);
         return 0xFF000000 | rgb;
     }
 
@@ -50,7 +52,7 @@ public final class ConsoleSettings {
         return componentColors.computeIfAbsent(tagName, tag -> {
             int hash = tag.hashCode();
             float hue = ((hash & 0xFFFF) % 360) / 360.0f;
-            int rgb = java.awt.Color.HSBtoRGB(hue, 0.85f, 0.95f);
+            int rgb = HSBtoRGB(hue, 0.85f, 0.95f);
             return 0xFF000000 | rgb;
         });
     }
