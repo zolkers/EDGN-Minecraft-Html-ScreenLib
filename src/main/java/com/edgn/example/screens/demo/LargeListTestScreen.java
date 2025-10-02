@@ -2,7 +2,7 @@ package com.edgn.example.screens.demo;
 
 import com.edgn.edml.data.binding.BindingContext;
 import com.edgn.edml.data.collections.ObservableList;
-import com.edgn.edml.minecraft.screen.screens.StandardResourceEdmlScreen;
+import com.edgn.edml.screen.screens.StandardResourceEdmlScreen;
 import net.minecraft.text.Text;
 
 public class LargeListTestScreen extends StandardResourceEdmlScreen {

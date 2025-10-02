@@ -1,14 +1,13 @@
 package com.edgn.edml.layout.sizing;
 
-import com.edgn.edml.component.TextCapableComponent;
-import com.edgn.edml.component.attribute.TagAttribute;
-import com.edgn.edml.component.edml.component.EdmlComponent;
-import com.edgn.edml.component.edml.EdmlEnum;
-import com.edgn.edml.component.edml.components.EdssAwareComponent;
-import com.edgn.edml.component.edml.components.elements.SelfSizingComponent;
-import com.edgn.edml.layout.spacing.Margin;
-import com.edgn.edml.layout.spacing.Padding;
-import com.edgn.edml.minecraft.MinecraftRenderContext;
+import com.edgn.edml.dom.components.attributes.TextCapableComponent;
+import com.edgn.edml.dom.components.attributes.TagAttribute;
+import com.edgn.edml.core.component.EdmlComponent;
+import com.edgn.edml.dom.components.EdssAwareComponent;
+import com.edgn.edml.dom.components.elements.SelfSizingComponent;
+import com.edgn.edml.layout.box.Margin;
+import com.edgn.edml.layout.box.Padding;
+import com.edgn.edml.core.rendering.MinecraftRenderContext;
 
 public class ComponentSizeCalculator implements IComponentSizeCalculator {
 

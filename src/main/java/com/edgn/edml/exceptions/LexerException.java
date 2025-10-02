@@ -1,6 +1,6 @@
 package com.edgn.edml.exceptions;
 
-import com.edgn.edml.tokenizer.Position;
+import com.edgn.edml.parser.tokenizer.Position;
 
 public class LexerException extends Exception {
     private final Position position;

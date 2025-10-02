@@ -1,11 +1,9 @@
 package com.edgn.edml.data.binding;
 
 import com.edgn.HTMLMyScreen;
-import com.edgn.edml.component.attribute.TagAttribute;
-import com.edgn.edml.component.edml.component.AbstractEdmlComponent;
-import com.edgn.edml.component.edml.component.EdmlComponent;
-import com.edgn.edml.component.edml.components.ui.VirtualListComponent;
-import com.edgn.edml.data.IBindingContext;
+import com.edgn.edml.dom.components.attributes.TagAttribute;
+import com.edgn.edml.core.component.EdmlComponent;
+import com.edgn.edml.ui.virtual.VirtualListComponent;
 import com.edgn.edml.data.collections.ObservableList;
 
 import java.util.*;

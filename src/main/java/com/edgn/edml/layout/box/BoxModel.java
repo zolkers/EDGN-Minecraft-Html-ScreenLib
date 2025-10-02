@@ -1,8 +1,5 @@
 package com.edgn.edml.layout.box;
 
-import com.edgn.edml.layout.spacing.Margin;
-import com.edgn.edml.layout.spacing.Padding;
-
 public final class BoxModel {
     private final Margin margin;
     private final Padding padding;

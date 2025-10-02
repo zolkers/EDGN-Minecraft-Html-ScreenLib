@@ -1,6 +1,5 @@
 package com.edgn.edml.data.binding;
 
-import com.edgn.edml.data.IBindingContext;
 import com.edgn.edml.data.collections.ObservableList;
 
 import java.util.*;
