@@ -10,8 +10,8 @@
             data-for="item in testItems"
             data-item-height="10">
         </virtual-list>
-        <div>Coucou</div>
-        <div>Coucou 2</div>
+
+        <button data-click="editItem" data-text="coucou"></button>
 
     </main>
 </body>

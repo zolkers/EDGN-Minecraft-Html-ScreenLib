@@ -1,7 +1,7 @@
 body {
     width: 100vw;
     height: 100vh;
-    background-color: #f0f0f0;
+    background-color: #f5f5f5;
     margin: 0px;
     padding: 0px;
 }
@@ -22,20 +22,53 @@ header div {
 
 main {
     width: 100%;
+    height: calc(100vh - 60px);
     padding: 20px;
     background-color: #ffffff;
 }
 
-main > div {
-    height: 30px;
-    margin: 10px 0px;
-    padding: 10px;
-    background-color: #e0e0e0;
-}
-
 #test-list {
     width: 100%;
-    height: 400px;
+    height: 100%;
     background-color: white;
     margin: 10px 0px;
+}
+
+.list-item {
+    width: 100%;
+    height: 45px;
+    padding: 5px 10px;
+    background-color: #ffffff;
+}
+
+.list-item button {
+    width: 90px;
+    height: 30px;
+    margin: 0px 5px;
+    padding: 5px 10px;
+}
+
+button.primary {
+    background-color: #2196F3;
+    color: white;
+}
+
+button.success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+button.warning {
+    background-color: #ff9800;
+    color: white;
+}
+
+button.danger {
+    background-color: #f44336;
+    color: white;
+}
+
+button {
+    background-color: #9E9E9E;
+    color: white;
 }

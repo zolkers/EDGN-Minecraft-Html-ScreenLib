@@ -208,7 +208,6 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
             int itemAbsoluteY = i * itemHeight;
             int itemRenderY = y + itemAbsoluteY - scrollOffset;
 
-            // Clipper l'item verticalement
             ClippedRectangle clippedItem = RectangleClipper.clipVertical(
                     clipRegion,
                     x,
@@ -228,21 +227,17 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
 
     private void renderItemClipped(MinecraftRenderContext context, Object itemData, int index,
                                    ClippedRectangle clipped, int originalY) {
-        // Couleur alternée
         int itemColor = (index % 2 == 0) ?
                 ColorUtils.parseColor("#ffffff") :
                 ColorUtils.parseColor("#f9f9f9");
 
-        // Rendre le background clippé
         context.drawRect(clipped.getX(), clipped.getY(), clipped.getWidth(), clipped.getHeight(), itemColor);
 
-        // Calculer la position du texte
         String processedContent = processTemplate(itemData, index);
 
         int textX = clipped.getX() + 10;
         int textBaseY = originalY + (itemHeight - 10) / 2;
 
-        // Vérifier si le texte est dans la zone visible
         int textHeight = 10;
         if (textBaseY >= clipped.getY() && textBaseY + textHeight <= clipped.getY() + clipped.getHeight()) {
             context.drawText(processedContent, textX, textBaseY, ColorUtils.parseColor("#333333"));

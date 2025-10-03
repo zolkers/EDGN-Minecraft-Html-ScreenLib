@@ -4,6 +4,7 @@ import com.edgn.edml.core.component.ComponentFactory;
 import com.edgn.edml.core.component.EdmlComponent;
 import com.edgn.edml.dom.EdmlEnum;
 import com.edgn.edml.dom.components.containers.*;
+import com.edgn.edml.dom.components.elements.ButtonComponent;
 import com.edgn.edml.dom.components.elements.ImageComponent;
 import com.edgn.edml.dom.components.elements.TextComponent;
 import com.edgn.edml.ui.scroll.ScrollbarComponent;
@@ -36,14 +37,17 @@ public final class ComponentRegistryBuilder {
                 HeaderComponent::new,
                 MainComponent::new,
                 FooterComponent::new,
-                SectionComponent::new
+                SectionComponent::new,
+                AsideComponent::new,
+                ArticleComponent::new
         );
     }
 
     public ComponentRegistryBuilder registerStandardElements() {
         return registerComponents(
                 ImageComponent::new,
-                TextComponent::new
+                TextComponent::new,
+                ButtonComponent::new
         );
     }
 

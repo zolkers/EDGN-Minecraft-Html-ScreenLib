@@ -19,7 +19,6 @@ public final class DivComponent extends BaseContainer implements TextCapableComp
     );
 
     private String tooltip = "";
-    private String role = "";
     private String theme = TagAttribute.THEME_DEFAULT.getProperty();
     private int textColor = ColorUtils.parseColor("black");
 
@@ -29,38 +28,10 @@ public final class DivComponent extends BaseContainer implements TextCapableComp
 
     @Override
     protected void processSpecificAttributes(MinecraftRenderContext context) {
-        role = getAttribute(TagAttribute.ROLE.getProperty(), "");
         tooltip = getAttribute(TagAttribute.DATA_TOOLTIP.getProperty(), "");
         theme = getAttribute(TagAttribute.DATA_THEME.getProperty(), TagAttribute.THEME_DEFAULT.getProperty());
 
-        applyRoleSpecificBehavior();
         applyThemeFromClasses();
-    }
-
-    //TODO: one day maybe
-    private void applyRoleSpecificBehavior() {
-        switch (role) {
-            case "banner" -> {
-                if (!hasClass(TagAttribute.BANNER.getProperty())) {
-                    // Comportement spécifique aux bannières
-                }
-            }
-            case "navigation" -> {
-                if (!hasClass(TagAttribute.NAV.getProperty())) {
-                    // Comportement spécifique à la navigation
-                }
-            }
-            case "main" -> {
-                if (!hasClass(TagAttribute.MAIN_CONTENT.getProperty())) {
-                    // Comportement spécifique au contenu principal
-                }
-            }
-            case "complementary" -> {
-                if (!hasClass(TagAttribute.SIDEBAR.getProperty())) {
-                    // Comportement spécifique aux sidebars
-                }
-            }
-        }
     }
 
     private void applyThemeFromClasses() {
