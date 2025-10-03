@@ -300,9 +300,7 @@ public final class VirtualListComponent extends EdssAwareComponent implements Sc
         }
 
         if (canScroll() && scrollbar != null) {
-            if (scrollbar.handleClick(mouseX, mouseY, button)) {
-                return true;
-            }
+            return scrollbar.handleClick(mouseX, mouseY, button);
         }
 
         return false;

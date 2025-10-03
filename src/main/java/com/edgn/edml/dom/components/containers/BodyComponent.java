@@ -196,9 +196,11 @@ public final class BodyComponent extends EdssAwareComponent implements Clickable
             }
         }
 
+        double adjustedMouseY = mouseY + scrollOffset;
+
         for (EdmlComponent child : children) {
             if (child instanceof ClickableComponent clickable) {
-                boolean handled = clickable.handleClick(mouseX, mouseY, button);
+                boolean handled = clickable.handleClick(mouseX, adjustedMouseY, button);
                 if (handled) {
                     return true;
                 }
@@ -217,9 +219,11 @@ public final class BodyComponent extends EdssAwareComponent implements Clickable
             }
         }
 
+        double adjustedMouseY = mouseY + scrollOffset;
+
         for (EdmlComponent child : children) {
             if (child instanceof DraggableComponent draggable) {
-                if (draggable.handleDrag(mouseX, mouseY)) {
+                if (draggable.handleDrag(mouseX, adjustedMouseY)) {
                     return true;
                 }
             }
