@@ -13,16 +13,12 @@ public final class TabManager {
 
     public TabManager(EdmlScreen screen) {
         tabs.add(new SettingsTab());
+        tabs.add(new DebugTab(screen));
 
         tabs.getFirst().onActivated();
 
         HTMLMyScreen.LOGGER.info("TabManager initialized with {} tabs", tabs.size());
     }
-
-    public void addTab(IConsoleTab tab) {
-        tabs.add(tab);
-    }
-
     public IConsoleTab getActiveTab() {
         if (activeTabIndex >= 0 && activeTabIndex < tabs.size()) {
             return tabs.get(activeTabIndex);
@@ -49,8 +45,6 @@ public final class TabManager {
 
         activeTabIndex = index;
         tabs.get(activeTabIndex).onActivated();
-
-        HTMLMyScreen.LOGGER.debug("Switched to tab: {}", tabs.get(activeTabIndex).getName());
     }
 
     public int getTabCount() {
@@ -65,13 +59,10 @@ public final class TabManager {
     }
 
     public boolean handleClick(double mouseX, double mouseY, int button) {
-        HTMLMyScreen.LOGGER.info("TabManager.handleClick: mouseX={}, mouseY={}, button={}", mouseX, mouseY, button);
 
         IConsoleTab activeTab = getActiveTab();
         if (activeTab != null) {
-            boolean handled = activeTab.handleClick(mouseX, mouseY, button);
-            HTMLMyScreen.LOGGER.info("Tab '{}' returned: {}", activeTab.getName(), handled);
-            return handled;
+            return activeTab.handleClick(mouseX, mouseY, button);
         }
         return false;
     }

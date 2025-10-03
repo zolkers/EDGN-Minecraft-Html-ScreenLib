@@ -1,16 +1,10 @@
-// FILE: src/main/java/com/edgn/devtools/tabs/SettingsTab.java
 package com.edgn.devtools.tabs;
 
-import com.edgn.HTMLMyScreen;
 import com.edgn.devtools.DevToolsOverlay;
 import com.edgn.devtools.console.ConsoleSettings;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-
-import java.util.Map;
-
 public final class SettingsTab implements IConsoleTab {
-
     private static final int CHECKBOX_Y = 10;
     private static final int CHECKBOX_SIZE = 12;
     private static final int CHECKBOX_CLICK_PADDING = 10;
@@ -39,28 +33,6 @@ public final class SettingsTab implements IConsoleTab {
 
         String checkboxText = "Show Debug Boxes";
         context.drawText(client.textRenderer, checkboxText, checkboxX + 20, checkboxY + 2, 0xFFFFFF, false);
-
-        context.drawText(client.textRenderer, "Component Colors:", x + 10, y + 40, 0xCCCCCC, false);
-
-        Map<String, Integer> colors = settings.getAllRegisteredColors();
-        int currentY = y + 60;
-        int index = 0;
-
-        for (Map.Entry<String, Integer> entry : colors.entrySet()) {
-            if (index >= 10) break;
-
-            String tagName = entry.getKey();
-            if ("body".equalsIgnoreCase(tagName)) {
-                continue;
-            }
-            int color = entry.getValue();
-
-            context.fill(x + 20, currentY, x + 30, currentY + 10, color);
-            context.drawText(client.textRenderer, tagName, x + 35, currentY + 1, 0xFFFFFF, false);
-
-            currentY += 15;
-            index++;
-        }
     }
 
     @Override

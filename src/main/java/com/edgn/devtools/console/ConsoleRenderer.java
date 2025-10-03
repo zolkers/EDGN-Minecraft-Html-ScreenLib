@@ -71,7 +71,6 @@ public final class ConsoleRenderer {
     public boolean handleTabClick(int mouseX, int mouseY, TabManager tabManager, int consoleY) {
         MinecraftClient client = MinecraftClient.getInstance();
 
-        HTMLMyScreen.LOGGER.info("ConsoleRenderer.handleTabClick: mouseX={}, mouseY={}", mouseX, mouseY);
 
         if (mouseY < TAB_HEIGHT) {
             int currentX = PADDING;
@@ -81,7 +80,6 @@ public final class ConsoleRenderer {
                 int tabWidth = client.textRenderer.getWidth(tabName) + 20;
 
                 if (mouseX >= currentX && mouseX < currentX + tabWidth) {
-                    HTMLMyScreen.LOGGER.info("Tab {} clicked", i);
                     tabManager.setActiveTab(i);
                     return true;
                 }
